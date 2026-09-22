@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101828" />
+    <!-- <title>Shiftly — work that fits your life</title> -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="auth-panel" aria-live="polite">
+        <div class="auth-topbar">
+          <a class="auth-brand" href="#" aria-label="Shiftly home"><span class="brand-mark"><i></i><i></i><i></i></span><span>L</span></a>
+          <!-- <span class="secure-note"><span class="lock">⌑</span> Secure</span>
+          <button class="help-button" type="button" id="helpButton">Need help?</button> -->
+        </div>
+
+        <div id="authView" class="auth-view">
+          <div class="auth-heading">
+            <p class="eyebrow">WELCOME TO LabouRack</p>
+            <h2>Let’s get you started.</h2>
+            <p>Choose how you’d like to use LabouRack.</p>
+          </div>
+
+          <div class="role-switch" role="tablist" aria-label="Account type">
+            <button class="role-tab active" type="button" data-role="customer" role="tab" aria-selected="true">
+              <span class="role-icon customer-icon">⌂</span><span>Customer</span>
+            </button>
+            <button class="role-tab" type="button" data-role="worker" role="tab" aria-selected="false">
+              <span class="role-icon worker-icon">✦</span><span>Gig worker</span>
+            </button>
+            <button class="role-tab" type="button" data-role="admin" role="tab" aria-selected="false">
+              <span class="role-icon admin-icon">▣</span><span>Admin</span>
+            </button>
+          </div>
+
+          <div id="loginForms">
+            <form class="login-form active" data-form="customer" novalidate>
+              <div class="role-description"><span class="mini-badge customer-badge">⌂</span><div><strong>Find help nearby</strong><small>Post a task or hire a trusted pro.</small></div></div>
+              <label for="customerPhone">Mobile number</label>
+              <div class="phone-field">
+                <span class="country-code">+91</span>
+                <input id="customerPhone" class="phone-input" inputmode="numeric" maxlength="10" placeholder="Enter 10-digit number" autocomplete="tel" />
+              </div>
+              <button class="primary-button" type="submit">Continue with mobile <span>→</span></button>
+              <p class="signup-line">New to Shiftly? <button type="button" class="text-button register-trigger" data-register="customer">Create customer account</button></p>
+            </form>
+
+            <form class="login-form" data-form="worker" novalidate>
+              <div class="role-description"><span class="mini-badge worker-badge">✦</span><div><strong>Turn your skills into income</strong><small>Discover verified work in your area.</small></div></div>
+              <label for="workerPhone">Mobile number</label>
+              <div class="phone-field">
+                <span class="country-code">+91</span>
+                <input id="workerPhone" class="phone-input" inputmode="numeric" maxlength="10" placeholder="Enter 10-digit number" autocomplete="tel" />
+              </div>
+              <button class="primary-button" type="submit">Continue with mobile <span>→</span></button>
+              <p class="signup-line">New to Shiftly? <button type="button" class="text-button register-trigger" data-register="worker">Create worker profile</button></p>
+            </form>
+
+            <form class="login-form" data-form="admin" novalidate>
+              <div class="role-description"><span class="mini-badge admin-badge">▣</span><div><strong>Platform control centre</strong><small>For authorised Shiftly administrators only.</small></div></div>
+              <label for="adminId">Admin ID</label>
+              <input id="adminId" class="text-input" type="text" placeholder="Enter your admin ID" autocomplete="username" />
+              <label for="adminPassword">Password</label>
+              <div class="password-field"><input id="adminPassword" class="text-input" type="password" placeholder="Enter your password" autocomplete="current-password" /><button type="button" id="togglePassword" aria-label="Show password">◉</button></div>
+              <div class="form-row"><label class="check-label"><input type="checkbox" /> <span>Remember this device</span></label><button class="text-button" type="button">Forgot password?</button></div>
+              <button class="primary-button" type="submit">Sign in to admin <span>→</span></button>
+              <p class="admin-note">Admin access is provisioned by Shiftly. There is no public admin registration.</p>
+            </form>
+          </div>
+
+          <p class="terms">By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+        </div>
+
+        <div id="otpView" class="flow-view hidden">
+          <button class="back-button" type="button" data-back="login">← <span>Back to sign in</span></button>
+          <div class="auth-heading compact"><p class="eyebrow">VERIFY YOUR NUMBER</p><h2>Enter your OTP.</h2><p>We sent a 6-digit code to <strong id="otpPhone">+91 98765 43210</strong></p></div>
+          <form id="otpForm" novalidate>
+            <div class="otp-inputs" aria-label="One-time password">
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 1" autofocus />
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 2" />
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 3" />
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 4" />
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 5" />
+              <input inputmode="numeric" maxlength="1" aria-label="Digit 6" />
+            </div>
+            <p class="otp-hint">For this prototype, enter any 6 digits.</p>
+            <button class="primary-button" type="submit">Verify & continue <span>→</span></button>
+          </form>
+          <p class="resend-line">Didn't receive it? <button class="text-button" type="button" id="resendOtp">Resend code</button></p>
+        </div>
+
+        <div id="registerView" class="flow-view hidden">
+          <button class="back-button" type="button" data-back="login">← <span>Back to sign in</span></button>
+          <div class="auth-heading compact"><p class="eyebrow" id="registerEyebrow">CUSTOMER REGISTRATION</p><h2 id="registerTitle">Create your account.</h2><p id="registerSubtitle">A few details and you’ll be ready to post your first task.</p></div>
+          <div class="progress-steps" id="progressSteps" aria-label="Registration steps"></div>
+          <form id="registerForm" novalidate></form>
+        </div>
+
+        <div id="successView" class="flow-view hidden success-view">
+          <div class="success-icon">✓</div>
+          <p class="eyebrow">YOU'RE ALL SET</p>
+          <h2 id="successTitle">Welcome to Shiftly!</h2>
+          <p id="successText">Your account is ready. Let’s find the right person for the job.</p>
+          <button class="primary-button" id="launchButton" type="button">Go to my dashboard <span>→</span></button>
+        </div>
+
+        <div id="dashboardView" class="flow-view hidden dashboard-view">
+          <div class="dashboard-header"><a class="dashboard-brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span> shiftly</a><button class="avatar" id="profileButton" type="button" title="View profile" aria-label="View profile" aria-expanded="false">MK</button>
+            <aside class="profile-popover hidden" id="profilePopover" aria-label="Account details"></aside>
+          </div>
+          <section class="welcome-card"><p class="eyebrow">GOOD MORNING</p><h2 id="dashboardTitle">Ready to get something done?</h2><p id="dashboardCopy">Find verified help for your next task.</p><button class="light-button" type="button">Post a new task <span>+</span></button></section>
+          <section class="dashboard-content"><div class="section-heading"><h3>Recommended for you</h3><button class="text-button" type="button">See all</button></div><div class="task-card"><span class="task-icon">✦</span><div><strong id="taskTitle">Home & repairs</strong><small id="taskText">Find skilled local professionals.</small></div><span class="task-arrow">→</span></div></section>
+        </div>
+
+        <div class="toast hidden" id="toast" role="status"></div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
