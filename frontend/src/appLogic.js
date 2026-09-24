@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { sendOtp, verifyOtp, adminLogin, clearAuthTokens } from './api.js';
 
 export const SESSION_KEY = 'labourack-session';
 export const WORKER_PENDING = 'pending';
@@ -433,6 +434,8 @@ export function useLabouRackApp() {
   const [phone, setPhone] = useState('');
   const [admin, setAdmin] = useState({ id: '', password: '' });
   const [otp, setOtp] = useState(emptyOtp);
+  const [backendOtp, setBackendOtp] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
   const [toast, setToast] = useState('');
   const [customerRegistration, setCustomerRegistration] = useState(emptyCustomerRegistration);
   const [workerRegistration, setWorkerRegistration] = useState(emptyWorkerRegistration);
@@ -467,6 +470,13 @@ export function useLabouRackApp() {
       timestamp: 'Just now',
     },
   ]);
+  const [currentEstimate, setCurrentEstimate] = useState(() => {
+    try {
+      const stored = localStorage.getItem('labourack_current_estimate');
+      if (stored) return JSON.parse(stored);
+    } catch (_) {}
+    return null;
+  });
   const [bookingModal, setBookingModal] = useState({
     open: false,
     worker: null,
@@ -476,6 +486,7 @@ export function useLabouRackApp() {
     timeSlot: 'Immediate (within 15 mins)',
     address: 'Indiranagar, Bengaluru',
     note: '',
+    photos: [],
   });
 
   const toastTimer = useRef();
@@ -531,11 +542,42 @@ export function useLabouRackApp() {
       timeSlot: 'Immediate (within 15 mins)',
       address: selectedLocation,
       note: '',
+      photos: [],
     });
   }
 
   function closeBookingModal() {
     setBookingModal(prev => ({ ...prev, open: false }));
+  }
+
+  function addBookingPhoto(file) {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      return showToast('Image too large. Maximum size is 10MB.');
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const newPhoto = {
+        id: 'photo_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        name: file.name,
+        size: (file.size / 1024).toFixed(1) + ' KB',
+        dataUrl: e.target.result,
+      };
+      setBookingModal(prev => ({
+        ...prev,
+        photos: [...(prev.photos || []), newPhoto],
+      }));
+      showToast('📸 Photo attached: ' + file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeBookingPhoto(photoId) {
+    setBookingModal(prev => ({
+      ...prev,
+      photos: (prev.photos || []).filter(p => p.id !== photoId),
+    }));
+    showToast('Photo removed.');
   }
 
   function confirmBooking(event) {
@@ -544,6 +586,7 @@ export function useLabouRackApp() {
     const assignedWorker = bookingModal.worker;
     const taskIssue = bookingModal.issue || 'Home Service';
     const taskCat = bookingModal.category || homeRepair.category;
+    const taskPhotos = bookingModal.photos || [];
     
     setBookingModal(prev => ({ ...prev, open: false }));
     setPaymentModal({
@@ -552,6 +595,7 @@ export function useLabouRackApp() {
       worker: assignedWorker,
       issue: taskIssue,
       category: taskCat,
+      photos: taskPhotos,
       visitingFee: 99,
       safetyFee: 20,
       discount: 50,
@@ -573,6 +617,7 @@ export function useLabouRackApp() {
       worker: autoWorker,
       issue: issueName,
       category: cat,
+      photos: [],
       visitingFee: 99,
       safetyFee: 20,
       discount: 50,
@@ -594,6 +639,7 @@ export function useLabouRackApp() {
         workerName: assignedWorker.name,
         issue: paymentModal.issue || 'Household Service',
         categoryIcon: paymentModal.category ? paymentModal.category.icon : '✦',
+        photos: paymentModal.photos || [],
         status: 'En route',
         eta: (assignedWorker.time || 5) + ' mins away',
         rate: assignedWorker.rate || 300,
@@ -648,21 +694,61 @@ export function useLabouRackApp() {
     if (isEmpty && otpRefs.current[index - 1]) otpRefs.current[index - 1].focus();
   }
 
-  function login(event) {
-    event.preventDefault();
+  function fillOtp(code) {
+    if (!code) return;
+    const digits = String(code).replace(/\D/g, '').slice(0, 6).split('');
+    const padded = [...digits, ...emptyOtp()].slice(0, 6);
+    setOtp(padded);
+    showToast('Code auto-filled.');
+  }
+
+  async function login(event) {
+    if (event) event.preventDefault();
     if (role === 'admin') {
       if (!admin.id.trim() || !admin.password) return showToast('Enter your admin ID and password to continue.');
-      updateSession({ role: 'admin', name: 'LabouRack administrator' });
-      return setPage('dashboard');
+      setAuthLoading(true);
+      try {
+        const res = await adminLogin(admin.id.trim(), admin.password);
+        updateSession({ role: 'admin', name: res.name || 'LabouRack administrator', token: res.access_token });
+        showToast('Welcome back, Admin!');
+        setPage('dashboard');
+      } catch (err) {
+        console.warn('Backend admin login failed, fallback to local demo:', err.message);
+        updateSession({ role: 'admin', name: 'LabouRack administrator' });
+        showToast('Logged in as Admin (Demo Mode)');
+        setPage('dashboard');
+      } finally {
+        setAuthLoading(false);
+      }
+      return;
     }
+
     if (!phoneIsValid(phone)) return showToast('Please enter a valid 10-digit mobile number.');
-    updateSession({ role, phone });
-    setOtp(emptyOtp());
-    setPage('otp');
+
+    setAuthLoading(true);
+    try {
+      showToast('Sending OTP...');
+      const res = await sendOtp(phone, role, 'login');
+      updateSession({ role, phone });
+      setOtp(emptyOtp());
+      if (res.otp) {
+        setBackendOtp(res.otp);
+        showToast(`OTP sent! (Dev Code: ${res.otp})`);
+      } else {
+        showToast(`OTP sent to +91 ${phone}`);
+      }
+      setPage('otp');
+    } catch (err) {
+      console.warn('Backend sendOtp error:', err);
+      showToast(err.message || 'No account found. Please register first.');
+    } finally {
+      setAuthLoading(false);
+    }
   }
 
   function startRegistration() {
     setOtp(emptyOtp());
+    setBackendOtp('');
     if (role === 'worker') {
       setWorkerRegistration(emptyWorkerRegistration());
       setPage('worker-registration');
@@ -672,11 +758,49 @@ export function useLabouRackApp() {
     }
   }
 
-  function verifyLoginOtp(event) {
-    event.preventDefault();
+  async function verifyLoginOtp(event) {
+    if (event) event.preventDefault();
     if (!otpIsComplete(otp)) return showToast('Enter the complete 6-digit OTP.');
-    if (role === 'worker' && session.workerVerification === WORKER_PENDING) return setPage('worker-pending');
-    setPage('dashboard');
+    const code = otp.join('');
+
+    setAuthLoading(true);
+    try {
+      showToast('Verifying code...');
+      const res = await verifyOtp(phone, code, role, 'login');
+      updateSession({
+        role: res.role || role,
+        name: res.name || (role === 'worker' ? 'Gig Worker' : 'Customer'),
+        phone: phone,
+        token: res.access_token,
+        userId: res.user_id,
+      });
+      showToast('Authentication successful!');
+      if (role === 'worker' && session.workerVerification === WORKER_PENDING) {
+        return setPage('worker-pending');
+      }
+      setPage('dashboard');
+    } catch (err) {
+      console.warn('Backend verifyOtp error:', err);
+      showToast(err.message || 'Invalid or expired OTP. Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function resendOtp() {
+    setOtp(emptyOtp());
+    try {
+      showToast('Sending a fresh OTP...');
+      const res = await sendOtp(phone, role, 'login');
+      if (res && res.otp) {
+        setBackendOtp(res.otp);
+        showToast(`Fresh OTP sent! (Dev Code: ${res.otp})`);
+      } else {
+        showToast('A fresh OTP has been sent to your mobile.');
+      }
+    } catch (err) {
+      showToast(err.message || 'Could not resend OTP.');
+    }
   }
 
   function updateCustomerRegistration(values) {
@@ -691,14 +815,24 @@ export function useLabouRackApp() {
     updateCustomerRegistration({ phone: normalizePhone(value), otpSent: false });
   }
 
-  function sendCustomerOtp() {
+  async function sendCustomerOtp() {
     if (!phoneIsValid(customerRegistration.phone)) return showToast('Enter a valid 10-digit mobile number first.');
-    updateCustomerRegistration({ otpSent: true });
-    setOtp(emptyOtp());
-    showToast('OTP sent to your mobile number.');
+    try {
+      const res = await sendOtp(customerRegistration.phone, 'customer', 'register');
+      updateCustomerRegistration({ otpSent: true });
+      setOtp(emptyOtp());
+      if (res.otp) {
+        setBackendOtp(res.otp);
+        showToast(`OTP sent! (Dev Code: ${res.otp})`);
+      } else {
+        showToast('OTP sent to your mobile number.');
+      }
+    } catch (err) {
+      showToast(err.message || 'Could not send OTP.');
+    }
   }
 
-  function submitCustomerRegistration(event) {
+  async function submitCustomerRegistration(event) {
     event.preventDefault();
     if (customerRegistration.step === 1) {
       if (!customerRegistration.name.trim()) return showToast('Please enter your full name.');
@@ -707,9 +841,26 @@ export function useLabouRackApp() {
       return updateCustomerRegistration({ step: 2 });
     }
     if (!otpIsComplete(otp)) return showToast('Enter the complete 6-digit OTP.');
-    updateSession({ role: 'customer', name: customerRegistration.name.trim(), phone: customerRegistration.phone, location: selectedLocation, workerVerification: null });
-    setRole('customer');
-    setPage('success');
+    
+    setAuthLoading(true);
+    try {
+      const res = await verifyOtp(customerRegistration.phone, otp.join(''), 'customer', 'register');
+      updateSession({
+        role: 'customer',
+        name: customerRegistration.name.trim(),
+        phone: customerRegistration.phone,
+        location: selectedLocation,
+        workerVerification: null,
+        token: res.access_token,
+        userId: res.user_id,
+      });
+      setRole('customer');
+      setPage('success');
+    } catch (err) {
+      showToast(err.message || 'Invalid OTP code.');
+    } finally {
+      setAuthLoading(false);
+    }
   }
 
   function updateWorkerRegistration(values) {
@@ -740,11 +891,21 @@ export function useLabouRackApp() {
     updateWorkerRegistration({ consented });
   }
 
-  function sendWorkerOtp() {
+  async function sendWorkerOtp() {
     if (!phoneIsValid(workerRegistration.phone)) return showToast('Enter a valid 10-digit mobile number first.');
-    updateWorkerRegistration({ otpSent: true });
-    setOtp(emptyOtp());
-    showToast('OTP sent to your mobile number.');
+    try {
+      const res = await sendOtp(workerRegistration.phone, 'worker', 'register');
+      updateWorkerRegistration({ otpSent: true });
+      setOtp(emptyOtp());
+      if (res.otp) {
+        setBackendOtp(res.otp);
+        showToast(`OTP sent! (Dev Code: ${res.otp})`);
+      } else {
+        showToast('OTP sent to your mobile number.');
+      }
+    } catch (err) {
+      showToast(err.message || 'Could not send OTP.');
+    }
   }
 
   function verifyAadhaar() {
@@ -760,7 +921,7 @@ export function useLabouRackApp() {
     updateWorkerRegistration({ skills });
   }
 
-  function submitWorkerRegistration(event) {
+  async function submitWorkerRegistration(event) {
     event.preventDefault();
     if (workerRegistration.step === 1) {
       if (!workerRegistration.name.trim()) return showToast('Please enter your full name.');
@@ -770,7 +931,15 @@ export function useLabouRackApp() {
     }
     if (workerRegistration.step === 2) {
       if (!otpIsComplete(otp)) return showToast('Enter the complete 6-digit OTP.');
-      return updateWorkerRegistration({ step: 3 });
+      setAuthLoading(true);
+      try {
+        await verifyOtp(workerRegistration.phone, otp.join(''), 'worker', 'register');
+        return updateWorkerRegistration({ step: 3 });
+      } catch (err) {
+        return showToast(err.message || 'Invalid OTP code.');
+      } finally {
+        setAuthLoading(false);
+      }
     }
     if (workerRegistration.step === 3) {
       if (!workerRegistration.aadhaarVerified) return showToast('Verify your Aadhaar number to continue.');
@@ -975,6 +1144,8 @@ export function useLabouRackApp() {
       phone,
       admin,
       otp,
+      backendOtp,
+      authLoading,
       toast,
       customerRegistration,
       workerRegistration,
@@ -984,6 +1155,7 @@ export function useLabouRackApp() {
       locationModalOpen,
       savedWorkers,
       activeBookings,
+      currentEstimate,
       bookingModal,
       paymentModal,
       availableLocations,
@@ -992,6 +1164,7 @@ export function useLabouRackApp() {
       homeRepair: { ...homeRepair, workers: matchingWorkers },
     },
     actions: {
+      setPage,
       setRole,
       setPhone: value => setPhone(normalizePhone(value)),
       setAdminId: id => setAdmin(current => ({ ...current, id })),
@@ -1001,12 +1174,18 @@ export function useLabouRackApp() {
       setOtpDigit,
       pasteOtp,
       focusPreviousOtp,
+      fillOtp,
       login,
       startRegistration,
       verifyLoginOtp,
-      resendOtp: () => showToast('A fresh code is on its way.'),
+      resendOtp,
       showToast,
       goToLogin: () => setPage('login'),
+      openEstimateReview: (est) => {
+        if (est) setCurrentEstimate(est);
+        setPage('estimate-review');
+      },
+      setCurrentEstimate,
       updateCustomerRegistration,
       setCustomerName,
       setCustomerPhone,
@@ -1028,6 +1207,7 @@ export function useLabouRackApp() {
       continueToDashboard: () => setPage('dashboard'),
       toggleProfile: () => setProfileOpen(open => !open),
       signOut: () => {
+        clearAuthTokens();
         setProfileOpen(false);
         setPage('login');
       },
@@ -1060,6 +1240,8 @@ export function useLabouRackApp() {
       setPaymentMethod,
       cancelBooking,
       setBookingModalField: (field, val) => setBookingModal(prev => ({ ...prev, [field]: val })),
+      addBookingPhoto,
+      removeBookingPhoto,
     },
   };
 }

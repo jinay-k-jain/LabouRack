@@ -19,9 +19,40 @@ export default function OtpPage({ state, actions }) {
         </div>
         <form onSubmit={actions.verifyLoginOtp} noValidate>
           <OtpInputs otp={state.otp} actions={actions} />
-          <p className="otp-hint">💡 Demo Hint: Enter any 6 digits (e.g. 1 2 3 4 5 6) to proceed.</p>
-          <button className="primary-button" type="submit">
-            Verify &amp; Enter Dashboard <span>→</span>
+          {state.backendOtp && (
+            <div style={{
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              borderRadius: 8,
+              padding: '8px 12px',
+              margin: '12px 0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: 12,
+              color: '#10b981',
+            }}>
+              <span>🔑 Backend Dev OTP: <strong>{state.backendOtp}</strong></span>
+              <button
+                type="button"
+                onClick={() => actions.fillOtp(state.backendOtp)}
+                style={{
+                  background: '#10b981',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '4px 10px',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Auto-fill
+              </button>
+            </div>
+          )}
+          <button className="primary-button" type="submit" disabled={state.authLoading}>
+            {state.authLoading ? 'Verifying with Backend...' : <>Verify &amp; Enter Dashboard <span>→</span></>}
           </button>
         </form>
         <p className="resend-line">

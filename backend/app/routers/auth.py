@@ -20,12 +20,14 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 class SendOtpRequest(BaseModel):
     phone: str
     role: str = "customer"   # customer | worker
+    flow: str = "login"      # login | register
 
 
 class VerifyOtpRequest(BaseModel):
     phone: str
     otp: str
     role: str = "customer"
+    flow: str = "login"      # login | register
 
 
 class AdminLoginRequest(BaseModel):
@@ -48,9 +50,32 @@ class TokenResponse(BaseModel):
 
 # ── Send OTP ──────────────────────────────────────────────────────────────────
 @router.post("/send-otp", summary="Send OTP to phone number")
-async def send_otp(body: SendOtpRequest):
+async def send_otp(body: SendOtpRequest, db: AsyncSession = Depends(get_db)):
     if len(body.phone) != 10 or not body.phone.isdigit():
         raise HTTPException(status_code=422, detail="Enter a valid 10-digit phone number.")
+
+    # Check database existence based on flow
+    result = await db.execute(select(User).where(User.phone == body.phone))
+    user = result.scalar_one_or_none()
+
+    if body.flow == "login":
+        if not user:
+            role_label = "Gig Worker" if body.role == "worker" else "Customer"
+            raise HTTPException(
+                status_code=404,
+                detail=f"No registered {role_label} account found with +91{body.phone}. Please register first.",
+            )
+        if user.role.value != body.role:
+            raise HTTPException(
+                status_code=400,
+                detail=f"This number is registered as '{user.role.value}'. Please select '{user.role.value.capitalize()}' to sign in.",
+            )
+    elif body.flow == "register":
+        if user:
+            raise HTTPException(
+                status_code=400,
+                detail=f"An account already exists with +91{body.phone} ({user.role.value}). Please sign in instead.",
+            )
 
     otp = generate_otp(6)
     await store_otp(body.phone, otp)
@@ -73,12 +98,11 @@ async def send_otp(body: SendOtpRequest):
 async def verify_otp(body: VerifyOtpRequest, db: AsyncSession = Depends(get_db)):
     stored = await get_otp(body.phone)
 
-    # In dev: accept any 6-digit code if DEBUG=true
-    if not settings.DEBUG:
-        if stored is None:
-            raise HTTPException(status_code=400, detail="OTP expired or not requested.")
-        if stored != body.otp:
-            raise HTTPException(status_code=400, detail="Invalid OTP.")
+    # Strict OTP validation — always verify exact match
+    if not stored:
+        raise HTTPException(status_code=400, detail="OTP has expired or was not requested. Please request a new OTP.")
+    if stored != body.otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP code. Please enter the correct 6-digit code.")
 
     await delete_otp(body.phone)
 
@@ -86,12 +110,19 @@ async def verify_otp(body: VerifyOtpRequest, db: AsyncSession = Depends(get_db))
     result = await db.execute(select(User).where(User.phone == body.phone))
     user = result.scalar_one_or_none()
 
-    if not user:
-        role = UserRole(body.role) if body.role in UserRole._value2member_map_ else UserRole.customer
-        user = User(phone=body.phone, name=f"User_{body.phone[-4:]}", role=role)
-        db.add(user)
-        await db.flush()
-        await db.refresh(user)
+    if body.flow == "login":
+        if not user:
+            raise HTTPException(status_code=404, detail="Account not found. Please register first.")
+        if user.role.value != body.role:
+            raise HTTPException(status_code=403, detail=f"Account role mismatch: registered as {user.role.value}.")
+    else:
+        # Register flow
+        if not user:
+            role = UserRole(body.role) if body.role in UserRole._value2member_map_ else UserRole.customer
+            user = User(phone=body.phone, name=f"User_{body.phone[-4:]}", role=role)
+            db.add(user)
+            await db.flush()
+            await db.refresh(user)
 
     access  = create_access_token(user.id, user.role.value)
     refresh = create_refresh_token(user.id)

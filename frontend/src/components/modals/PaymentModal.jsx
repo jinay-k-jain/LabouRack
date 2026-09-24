@@ -70,6 +70,40 @@ export default function PaymentModal({ state, actions }) {
               </strong>
             </div>
 
+            {paymentModal.photos && paymentModal.photos.length > 0 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 12px',
+                background: 'rgba(16, 185, 129, 0.06)',
+                border: '1px solid rgba(16, 185, 129, 0.2)',
+                borderRadius: 8,
+                marginBottom: 12,
+              }}>
+                <span style={{ fontSize: 14 }}>📷</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981' }}>
+                  {paymentModal.photos.length} {paymentModal.photos.length === 1 ? 'photo' : 'photos'} attached:
+                </span>
+                <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
+                  {paymentModal.photos.map(p => (
+                    <img
+                      key={p.id}
+                      src={p.dataUrl}
+                      alt={p.name}
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 4,
+                        objectFit: 'cover',
+                        border: '1px solid #10b981',
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="payment-breakdown-box">
               <div className="payment-breakdown-row">
                 <span>Visiting &amp; Initial Inspection Fee</span>

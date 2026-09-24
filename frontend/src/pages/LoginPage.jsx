@@ -86,10 +86,10 @@ export default function LoginPage({ state, actions }) {
                 placeholder="Enter admin password"
                 autoComplete="current-password"
               />
-              <button className="primary-button" type="submit">
-                Access Admin Portal <span>→</span>
+              <button className="primary-button" type="submit" disabled={state.authLoading}>
+                {state.authLoading ? 'Verifying Admin...' : <>Access Admin Portal <span>→</span></>}
               </button>
-              <p className="admin-note">Demo Admin Credentials: any non-empty ID and Password.</p>
+              <p className="admin-note">Demo Admin Credentials: any non-empty ID and Password (default: admin / admin123).</p>
             </>
           ) : (
             <>
@@ -111,6 +111,43 @@ export default function LoginPage({ state, actions }) {
                 </div>
               )}
 
+              {/* ── Demo Account Helper Card ── */}
+              <div style={{
+                marginTop: 12,
+                marginBottom: 12,
+                padding: '10px 12px',
+                background: 'rgba(59, 130, 246, 0.07)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: 10,
+                fontSize: 12,
+                color: '#93c5fd',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+              }}>
+                <div>
+                  <strong>💡 Registered Demo {role === 'worker' ? 'Worker' : 'Customer'}:</strong>{' '}
+                  <span>{role === 'worker' ? '9812345678' : '9876543210'}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => actions.setPhone(role === 'worker' ? '9812345678' : '9876543210')}
+                  style={{
+                    background: '#3b82f6',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 6,
+                    padding: '3px 8px',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Fill Demo
+                </button>
+              </div>
+
               <label htmlFor="loginPhone">Mobile Phone Number</label>
               <div className="phone-field">
                 <span className="country-code">🇮🇳 +91</span>
@@ -125,8 +162,8 @@ export default function LoginPage({ state, actions }) {
                   autoComplete="tel"
                 />
               </div>
-              <button className="primary-button" type="submit">
-                Continue with OTP <span>→</span>
+              <button className="primary-button" type="submit" disabled={state.authLoading}>
+                {state.authLoading ? 'Connecting to Backend...' : <>Continue with OTP <span>→</span></>}
               </button>
 
               {/* ── New worker: prominent register card ── */}

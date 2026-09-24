@@ -87,6 +87,69 @@ export default function DashboardPage({ state, actions }) {
               <span className="pulse-dot" />
               <span>LIVE TASK ACTIVE</span>
             </div>
+
+            {/* ── AI Estimate Inspection Alert Card ── */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(16,185,129,.12), rgba(59,130,246,.1))',
+              border: '1.5px solid rgba(16,185,129,.4)',
+              borderRadius: 14,
+              padding: '16px 18px',
+              marginBottom: 14,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 14,
+              flexWrap: 'wrap',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 32 }}>🤖</span>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      background: '#10b981',
+                      color: '#fff',
+                      padding: '2px 8px',
+                      borderRadius: 6,
+                      textTransform: 'uppercase',
+                      letterSpacing: '.05em',
+                    }}>
+                      Estimate Ready
+                    </span>
+                    <strong style={{ fontSize: 14, color: 'var(--ink)' }}>
+                      Worker Rohit Kumar Submitted On-Site Quote (₹470)
+                    </strong>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 12, color: 'var(--muted)' }}>
+                    ✨ AI Market Benchmark: <strong style={{ color: '#10b981' }}>₹440</strong> • Includes parts + labor. Review photos &amp; accept/reject.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => actions.openEstimateReview && actions.openEstimateReview()}
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  color: '#fff',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(16,185,129,.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <span>Review Estimate &amp; AI Price</span>
+                <span>→</span>
+              </button>
+            </div>
+
             {state.activeBookings.map(b => (
               <div key={b.id} className="active-booking-card">
                 <span className="booking-icon">{b.categoryIcon || '💧'}</span>
@@ -95,6 +158,26 @@ export default function DashboardPage({ state, actions }) {
                   <small>
                     Assigned Pro: <b>{b.workerName}</b> • {b.status} ({b.eta})
                   </small>
+                  {b.photos && b.photos.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                      <span style={{ fontSize: 10, color: 'var(--muted)' }}>📷 Attached Photos:</span>
+                      {b.photos.map(p => (
+                        <img
+                          key={p.id}
+                          src={p.dataUrl}
+                          alt={p.name}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: 4,
+                            objectFit: 'cover',
+                            border: '1px solid var(--line)',
+                          }}
+                          title={p.name}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="booking-actions">
                   <button

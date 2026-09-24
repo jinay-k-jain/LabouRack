@@ -39,30 +39,35 @@ _memory_sets: dict[str, set] = {}
 
 
 async def store_otp(phone: str, otp: str) -> None:
-    """Store OTP in Redis with TTL (falls back to memory if Redis is down)."""
+    """Store OTP in Redis with TTL (and sync to in-memory backup)."""
+    _memory_cache[f"{OTP_PREFIX}{phone}"] = otp
     try:
         r = await get_redis()
         await r.setex(f"{OTP_PREFIX}{phone}", settings.OTP_TTL_SECONDS, otp)
     except Exception:
-        _memory_cache[f"{OTP_PREFIX}{phone}"] = otp
+        pass
 
 
 async def get_otp(phone: str) -> Optional[str]:
-    """Retrieve OTP from Redis (falls back to memory if Redis is down)."""
+    """Retrieve OTP from Redis (falls back to memory backup)."""
     try:
         r = await get_redis()
-        return await r.get(f"{OTP_PREFIX}{phone}")
+        val = await r.get(f"{OTP_PREFIX}{phone}")
+        if val:
+            return val
     except Exception:
-        return _memory_cache.get(f"{OTP_PREFIX}{phone}")
+        pass
+    return _memory_cache.get(f"{OTP_PREFIX}{phone}")
 
 
 async def delete_otp(phone: str) -> None:
     """Delete OTP after successful verification."""
+    _memory_cache.pop(f"{OTP_PREFIX}{phone}", None)
     try:
         r = await get_redis()
         await r.delete(f"{OTP_PREFIX}{phone}")
     except Exception:
-        _memory_cache.pop(f"{OTP_PREFIX}{phone}", None)
+        pass
 
 
 # ── Generic cache helpers ─────────────────────────────────────────────────────

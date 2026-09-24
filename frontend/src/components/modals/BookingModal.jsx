@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { initials } from '../../appLogic.js';
 
 export default function BookingModal({ state, actions }) {
   const { bookingModal } = state;
+  const fileInputRef = useRef(null);
+
   if (!bookingModal || !bookingModal.open || !bookingModal.worker) return null;
 
   const worker = bookingModal.worker;
@@ -10,6 +12,28 @@ export default function BookingModal({ state, actions }) {
   const safetyFee = 20;
   const discount = 50;
   const totalPay = Math.max(0, baseRate + safetyFee - discount);
+  const photos = bookingModal.photos || [];
+
+  function handleFileChange(event) {
+    const files = event.target.files;
+    if (!files || !files.length) return;
+    for (let i = 0; i < files.length; i++) {
+      actions.addBookingPhoto(files[i]);
+    }
+    // Reset file input so user can choose same file again if desired
+    event.target.value = '';
+  }
+
+  function handleDrop(event) {
+    event.preventDefault();
+    const files = event.dataTransfer.files;
+    if (!files || !files.length) return;
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].type.startsWith('image/')) {
+        actions.addBookingPhoto(files[i]);
+      }
+    }
+  }
 
   return (
     <div className="modal-backdrop" onClick={actions.closeBookingModal}>
@@ -65,6 +89,86 @@ export default function BookingModal({ state, actions }) {
               onChange={e => actions.setBookingModalField('issue', e.target.value)}
               placeholder="Describe what needs fixing..."
             />
+          </div>
+
+          {/* PHOTO ATTACHMENT SECTION */}
+          <div className="booking-form-field">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <label htmlFor="photoUploadInput" style={{ marginBottom: 0, cursor: 'pointer' }}>
+                📷 Attach Photos of Issue <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(Optional)</span>
+              </label>
+              {photos.length > 0 && (
+                <span style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>
+                  ✓ {photos.length} {photos.length === 1 ? 'photo' : 'photos'} attached
+                </span>
+              )}
+            </div>
+
+            <input
+              id="photoUploadInput"
+              type="file"
+              accept="image/*"
+              multiple
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+
+            {photos.length > 0 ? (
+              <div className="booking-photos-container">
+                <div className="booking-photos-grid">
+                  {photos.map(photo => (
+                    <div key={photo.id} className="booking-photo-preview-item">
+                      <img src={photo.dataUrl} alt={photo.name} className="booking-photo-img" />
+                      <button
+                        type="button"
+                        className="booking-photo-remove-btn"
+                        onClick={() => actions.removeBookingPhoto(photo.id)}
+                        title="Remove photo"
+                      >
+                        ✕
+                      </button>
+                      <div className="booking-photo-caption">
+                        <span className="booking-photo-name" title={photo.name}>{photo.name}</span>
+                        <span className="booking-photo-size">{photo.size}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {photos.length < 5 && (
+                    <button
+                      type="button"
+                      className="booking-photo-add-more-btn"
+                      onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                    >
+                      <span style={{ fontSize: 22, lineHeight: 1 }}>+</span>
+                      <span>Add More</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div
+                className="booking-photo-dropzone"
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                onDragOver={e => e.preventDefault()}
+                onDrop={handleDrop}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInputRef.current && fileInputRef.current.click();
+                  }
+                }}
+              >
+                <div className="dropzone-icon-circle">📷</div>
+                <div className="dropzone-text-group">
+                  <strong>Click to attach photos or take a picture</strong>
+                  <small>Upload images of the damaged area, broken appliance, or leak</small>
+                </div>
+                <span className="dropzone-badge">JPG, PNG, WebP up to 10MB</span>
+              </div>
+            )}
           </div>
 
           <div className="booking-form-row">

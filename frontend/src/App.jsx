@@ -12,6 +12,7 @@ import CustomerRegistrationPage from './pages/CustomerRegistrationPage.jsx';
 import SuccessPage from './pages/SuccessPage.jsx';
 import PendingPage from './pages/PendingPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
+import CustomerEstimatePage from './pages/CustomerEstimatePage.jsx';
 
 // Modals & Globals
 import LocationPickerModal from './components/modals/LocationPickerModal.jsx';
@@ -83,6 +84,13 @@ export default function App() {
     otp: <OtpPage state={state} actions={actions} />,
     'customer-registration': <CustomerRegistrationPage state={state} actions={actions} />,
     success: <SuccessPage state={state} actions={actions} />,
+    'estimate-review': (
+      <CustomerEstimatePage
+        state={state}
+        actions={actions}
+        onBack={() => actions.setPage('dashboard')}
+      />
+    ),
   };
 
   return (
