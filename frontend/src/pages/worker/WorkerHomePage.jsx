@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DUMMY_JOB_REQUESTS, SERVICE_CATEGORIES } from './workerData.js';
+import VoiceInputButton from '../../components/VoiceInputButton.jsx';
 
 // ─── Injected styles ──────────────────────────────────────────────────────────
 const HOME_STYLE = `
@@ -7,9 +8,9 @@ const HOME_STYLE = `
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f5f8f6;--surface:#ffffff;--card:#ffffff;--border:#e3e8e4;
+  --bg:#f7faf8;--surface:#ffffff;--card:#ffffff;--border:#e3e8e4;
   --accent:#0b6b46;--accent2:#1d4ed8;--warn:#d97706;--danger:#dc2626;
-  --text:#0f1914;--muted:#617368;--subtle:#f0f5f3;
+  --text:#0f1914;--muted:#617368;--subtle:#f6f9f7;
   --radius:14px;--font:'Plus Jakarta Sans',sans-serif;
 }
 html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:var(--text)}
@@ -307,9 +308,9 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;
   white-space:nowrap;
 }
-.ins-status.active{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.25);}
-.ins-status.pending{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.25);}
-.ins-status.expired{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);}
+.ins-status.active{background:rgba(11,107,70,.1);color:#0b6b46;border:1px solid rgba(11,107,70,.2);}
+.ins-status.pending{background:rgba(217,119,6,.1);color:#b45309;border:1px solid rgba(217,119,6,.22);}
+.ins-status.expired{background:rgba(220,38,38,.08);color:#b91c1c;border:1px solid rgba(220,38,38,.18);}
 
 .ins-banner{
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
@@ -322,7 +323,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 .ins-banner-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;}
 .ins-banner-badge{
   font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;
-  background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.25);
+  background:rgba(11,107,70,.1);color:#0b6b46;border:1px solid rgba(11,107,70,.2);
 }
 .ins-plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .ins-plan-card{
@@ -338,8 +339,8 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   display:inline-block;margin-top:6px;font-size:10px;font-weight:700;
   padding:3px 8px;border-radius:6px;
 }
-.ins-plan-status.active{background:rgba(16,185,129,.15);color:#34d399;}
-.ins-plan-status.available{background:rgba(59,130,246,.12);color:#60a5fa;}
+.ins-plan-status.active{background:rgba(11,107,70,.1);color:#0b6b46;}
+.ins-plan-status.available{background:rgba(29,78,216,.08);color:#1d4ed8;}
 .ins-claim-btn{
   margin-top:14px;width:100%;padding:12px;border:none;border-radius:10px;
   background:linear-gradient(135deg,var(--accent2),#2563eb);
@@ -588,7 +589,7 @@ function JobCard({ job, onAccept, onReject }) {
         <div className="job-cat-badge">{job.categoryIcon}</div>
         <div className="job-info">
           <div className="job-urgency-row">
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: 'rgba(16,185,129,.15)', color: '#34d399', border: '1px solid rgba(16,185,129,.25)' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: 'rgba(11,107,70,.1)', color: '#0b6b46', border: '1px solid rgba(11,107,70,.2)' }}>
               ✅ Accepted
             </span>
             <span className="job-posted">Posted {job.postedAgo}</span>
@@ -735,8 +736,8 @@ function JobCard({ job, onAccept, onReject }) {
                   fontSize: 12,
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <span style={{ color: '#60a5fa', fontWeight: 700 }}>🤖 AI Fair Market Prediction:</span>
-                    <strong style={{ color: '#93c5fd', fontSize: 14 }}>₹{aiBenchmark}</strong>
+                    <span style={{ color: '#1d4ed8', fontWeight: 700 }}>🤖 AI Fair Market Prediction:</span>
+                    <strong style={{ color: '#1e40af', fontSize: 14 }}>₹{aiBenchmark}</strong>
                   </div>
                   <div style={{ color: 'var(--muted)', fontSize: 11 }}>
                     Standard City Benchmark range: ₹{Math.round(aiBenchmark * 0.9)} – ₹{Math.round(aiBenchmark * 1.15)} (96% Confidence)
@@ -797,7 +798,12 @@ function JobCard({ job, onAccept, onReject }) {
                   <span className="price-total-val">₹{total}</span>
                 </div>
 
+                <div className="field-label-row inspection-note-label">
+                  <label htmlFor={`inspection-note-${job.id}`}>Inspection notes</label>
+                  <VoiceInputButton />
+                </div>
                 <textarea
+                  id={`inspection-note-${job.id}`}
                   className="inspection-note"
                   placeholder="📝 Add inspection notes (e.g. 'Worn spindle threading causing continuous drip. Replaced spindle and washer.')"
                   value={note}
@@ -1005,7 +1011,7 @@ export default function WorkerHomePage({ worker, onSignOut }) {
                 </div>
 
                 {!online && (
-                  <div style={{ background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#f87171', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ background: 'rgba(220,38,38,.08)', border: '1px solid rgba(220,38,38,.18)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#b91c1c', display: 'flex', alignItems: 'center', gap: 8 }}>
                     ⚠️ You are currently <strong>offline</strong>. Toggle the status button above to receive job requests.
                   </div>
                 )}

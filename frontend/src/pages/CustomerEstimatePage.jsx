@@ -78,8 +78,8 @@ export default function CustomerEstimatePage({ state, actions, estimateOverride,
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const materials = estimate.materials || [];
-  const workerTotal = estimate.pricing?.totalWorkerQuote || 470;
-  const aiBenchmark = estimate.aiPrediction?.predictedBenchmark || 440;
+  const workerTotal = estimate.pricing?.totalWorkerQuote || 4700;
+  const aiBenchmark = estimate.aiPrediction?.predictedBenchmark || 4200;
   const variance = Math.round(((workerTotal - aiBenchmark) / aiBenchmark) * 100);
 
   function handleAccept() {
@@ -162,7 +162,6 @@ export default function CustomerEstimatePage({ state, actions, estimateOverride,
           <div className="estimate-hero-content">
             <div className="ai-badge-row">
               <span className="ai-chip">🤖 AI FAIR PRICE GUARANTEE</span>
-              <span className="sih-chip">SIH 2026 PROTOTYPE</span>
             </div>
             <h1>On-Site Repair Estimate &amp; AI Price Comparison</h1>
             <p className="estimate-hero-desc">
@@ -465,7 +464,7 @@ export default function CustomerEstimatePage({ state, actions, estimateOverride,
                     type="text"
                     value={counterNote}
                     onChange={e => setCounterNote(e.target.value)}
-                    placeholder="e.g. Can we do ₹440 as suggested by AI market benchmark?"
+                    placeholder="e.g. Can we do ₹4,200 as suggested by AI market benchmark?"
                     className="counter-input"
                   />
                 </div>

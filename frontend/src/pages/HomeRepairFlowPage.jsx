@@ -124,15 +124,18 @@ export default function HomeRepairFlowPage({ state, actions }) {
             <span className="back-arrow">←</span>
             <span>Back</span>
           </button>
-          <div
-            className="header-location-pill"
-            onClick={actions.openLocationModal}
-            title="Change active locality"
-          >
-            <span className="location-pin-icon">📍</span>
-            <span className="location-label">Active Locality:</span>
-            <strong className="location-name">{state.selectedLocation}</strong>
-            <span className="location-dropdown-arrow">▾</span>
+          <div className="service-header-actions">
+            <button type="button" className="language-switcher" title="Language selection coming soon" aria-label="Language selection coming soon">
+              <span aria-hidden="true">A/अ</span>
+              <span className="language-switcher-label">English</span>
+              <span aria-hidden="true">⌄</span>
+            </button>
+            <div className="header-location-pill" onClick={actions.openLocationModal} title="Change active locality">
+              <span className="location-pin-icon">📍</span>
+              <span className="location-label">Active Locality:</span>
+              <strong className="location-name">{state.selectedLocation}</strong>
+              <span className="location-dropdown-arrow">▾</span>
+            </div>
           </div>
         </header>
 
@@ -473,7 +476,7 @@ export default function HomeRepairFlowPage({ state, actions }) {
               <button
                 type="button"
                 className="change-service-btn"
-                onClick={actions.goBackInHomeRepair}
+                onClick={actions.changeServiceInHomeRepair}
               >
                 ✏️ Change Service
               </button>

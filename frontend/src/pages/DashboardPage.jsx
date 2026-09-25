@@ -4,7 +4,6 @@ import ProfileMenu from '../components/ProfileMenu.jsx';
 import WorkerCard from '../components/WorkerCard.jsx';
 import HomeRepairFlowPage from './HomeRepairFlowPage.jsx';
 import AdminAnalyticsDashboard from './AdminAnalyticsDashboard.jsx';
-import AIChatbot from '../components/AIChatbot.jsx';
 import { householdCategories, workerProfiles, popularHouseholdProblems } from '../appLogic.js';
 
 export default function DashboardPage({ state, actions }) {
@@ -49,6 +48,14 @@ export default function DashboardPage({ state, actions }) {
               />
               <button type="submit">Search</button>
             </form>
+          )}
+
+          {customer && (
+            <button type="button" className="language-switcher" title="Language selection coming soon" aria-label="Language selection coming soon">
+              <span aria-hidden="true">A/अ</span>
+              <span className="language-switcher-label">English</span>
+              <span aria-hidden="true">⌄</span>
+            </button>
           )}
 
           {/* EMERGENCY SOS BUTTON (Customer only) */}
@@ -123,11 +130,11 @@ export default function DashboardPage({ state, actions }) {
                       Estimate Ready
                     </span>
                     <strong style={{ fontSize: 14, color: 'var(--ink)' }}>
-                      Worker Rohit Kumar Submitted On-Site Quote (₹470)
+                      Worker Rohit Kumar Submitted On-Site Quote (₹4,700)
                     </strong>
                   </div>
                   <p style={{ margin: 0, fontSize: 12, color: 'var(--muted)' }}>
-                    ✨ AI Market Benchmark: <strong style={{ color: '#10b981' }}>₹440</strong> • Includes parts + labor. Review photos &amp; accept/reject.
+                    ✨ AI Market Benchmark: <strong style={{ color: '#10b981' }}>₹4,200</strong> • Includes parts + labor. Review photos &amp; accept/reject.
                   </p>
                 </div>
               </div>
@@ -212,8 +219,8 @@ export default function DashboardPage({ state, actions }) {
           <section className="hero-banner">
             <div className="hero-content">
               <div className="hero-badge">
-                <span>🛡️ SIH 2026 PROTOTYPE</span>
-                <p>Aadhaar-Verified Local Gig Network</p>
+                <span aria-hidden="true">🛡️</span>
+                <span>Verified local professionals</span>
               </div>
               <h1>Instant Household Help, Verified &amp; On-Demand.</h1>
               <p>
@@ -484,9 +491,6 @@ export default function DashboardPage({ state, actions }) {
           </section>
         )}
       </section>
-
-      {/* AI CHATBOT — Customer only */}
-      {customer && <AIChatbot />}
 
       {/* EMERGENCY SOS MODAL */}
       {showEmergencyModal && (

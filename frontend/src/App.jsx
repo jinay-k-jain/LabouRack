@@ -19,6 +19,7 @@ import LocationPickerModal from './components/modals/LocationPickerModal.jsx';
 import BookingModal from './components/modals/BookingModal.jsx';
 import PaymentModal from './components/modals/PaymentModal.jsx';
 import Toast from './components/Toast.jsx';
+import AIChatbot from './components/AIChatbot.jsx';
 
 // Pages where we stay in the shared auth shell (never jump to worker dashboard)
 const SHARED_AUTH_PAGES = ['login', 'otp', 'customer-registration', 'success'];
@@ -99,6 +100,7 @@ export default function App() {
       <LocationPickerModal state={state} actions={actions} />
       <BookingModal state={state} actions={actions} />
       <PaymentModal state={state} actions={actions} />
+      {state.role === 'customer' && !SHARED_AUTH_PAGES.includes(state.page) && <AIChatbot />}
       <Toast message={state.toast} />
     </>
   );
