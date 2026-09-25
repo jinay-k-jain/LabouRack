@@ -3,11 +3,13 @@ import Brand from '../components/Brand.jsx';
 import ProfileMenu from '../components/ProfileMenu.jsx';
 import WorkerCard from '../components/WorkerCard.jsx';
 import HomeRepairFlowPage from './HomeRepairFlowPage.jsx';
+import AdminAnalyticsDashboard from './AdminAnalyticsDashboard.jsx';
 import { householdCategories, workerProfiles, popularHouseholdProblems } from '../appLogic.js';
 
 export default function DashboardPage({ state, actions }) {
   const { role, searchQuery, dashboard } = state;
   const customer = role === 'customer';
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Show the home repair sub-flow for customers when active
   if (customer && state.homeRepair.view !== 'home') {
@@ -406,7 +408,11 @@ export default function DashboardPage({ state, actions }) {
         )}
 
         {/* ADMIN VIEW */}
-        {role === 'admin' && (
+        {role === 'admin' && showAnalytics && (
+          <AdminAnalyticsDashboard onBack={() => setShowAnalytics(false)} />
+        )}
+
+        {role === 'admin' && !showAnalytics && (
           <section className="admin-portal-view">
             <div className="admin-stats-cards">
               {[
@@ -423,6 +429,20 @@ export default function DashboardPage({ state, actions }) {
                 </div>
               ))}
             </div>
+
+            {/* AI ANALYTICS LAUNCH BUTTON */}
+            <button
+              className="analytics-launch-btn"
+              type="button"
+              onClick={() => setShowAnalytics(true)}
+            >
+              <span className="analytics-launch-icon">📈</span>
+              <div className="analytics-launch-text">
+                <strong>AI Demand Forecasting & Workforce Allocation</strong>
+                <small>View regional analytics, supply gaps, and ML-powered insights</small>
+              </div>
+              <span className="analytics-launch-arrow">→</span>
+            </button>
 
             <div className="section-heading">
               <h2>Pending Aadhaar &amp; Skill Verification Queue</h2>
