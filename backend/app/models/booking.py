@@ -70,3 +70,4 @@ class Booking(Base):
 
     from sqlalchemy.orm import relationship
     customer = relationship("CustomerProfile", back_populates="bookings")
+    job_requests = relationship("JobRequest", back_populates="booking")

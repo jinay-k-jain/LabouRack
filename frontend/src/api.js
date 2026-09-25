@@ -61,6 +61,47 @@ async function apiRequest(endpoint, { method = 'GET', body = null, token = null 
   return data;
 }
 
+export async function getAvailableWorkers(category) {
+  const query = category ? `?category=${encodeURIComponent(category)}` : '';
+  return apiRequest(`/workers/available${query}`);
+}
+
+export async function createBooking(body) {
+  return apiRequest('/bookings/', { method: 'POST', body });
+}
+
+export async function getMyBookings() {
+  return apiRequest('/bookings/me');
+}
+
+export async function cancelBookingRequest(bookingId) {
+  return apiRequest(`/bookings/${bookingId}/cancel`, { method: 'POST', body: {} });
+}
+
+export async function getWorkerJobs() {
+  return apiRequest('/workers/me/jobs');
+}
+
+export async function acceptWorkerJob(jobId) {
+  return apiRequest(`/workers/me/jobs/${jobId}/accept`, { method: 'POST' });
+}
+
+export async function rejectWorkerJob(jobId) {
+  return apiRequest(`/workers/me/jobs/${jobId}/reject`, { method: 'POST' });
+}
+
+export async function submitWorkerEstimate(jobId, body) {
+  return apiRequest(`/workers/me/jobs/${jobId}/estimate`, { method: 'POST', body: { job_id: jobId, ...body } });
+}
+
+export async function setWorkerAvailability(online) {
+  return apiRequest(`/workers/me/${online ? 'online' : 'offline'}`, { method: 'POST' });
+}
+
+export async function submitEstimateDecision(bookingId, body) {
+  return apiRequest(`/bookings/${bookingId}/estimate-decision`, { method: 'POST', body });
+}
+
 // ── Authentication Endpoints ──────────────────────────────────────────────────
 
 /**

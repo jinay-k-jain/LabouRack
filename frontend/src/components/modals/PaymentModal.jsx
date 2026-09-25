@@ -82,7 +82,7 @@ export default function PaymentModal({ state, actions }) {
             <section className="payment-problem-details" aria-labelledby="paymentProblemDetails">
               <div className="payment-problem-header">
                 <div>
-                  <p className="payment-problem-eyebrow">HELP THE PROFESSIONAL PREPARE</p>
+                  <p className="payment-problem-eyebrow">REQUEST DETAILS</p>
                   <h3 id="paymentProblemDetails">Describe the problem</h3>
                 </div>
                 <button
@@ -181,11 +181,12 @@ export default function PaymentModal({ state, actions }) {
               onClick={actions.confirmPaymentAndDispatch}
             >
               {paymentModal.paymentMethod === 'cod' ? (
-                <>Confirm Cash Booking &amp; Dispatch Worker ⚡ →</>
+                <>{paymentModal.autoAssigned ? 'Confirm Cash Booking & Auto-Dispatch Worker ⚡ →' : 'Confirm Cash Booking & Send Request →'}</>
               ) : (
-                <>Pay ₹{payableNow} &amp; Auto-Dispatch Worker ⚡ →</>
+                <>{paymentModal.autoAssigned ? `Pay ₹${payableNow} & Auto-Dispatch Worker ⚡ →` : `Pay ₹${payableNow} & Send Request →`}</>
               )}
             </button>
+            {paymentModal.error && <p style={{ margin: '10px 0 0', color: '#b91c1c', fontSize: 13, fontWeight: 600 }}>{paymentModal.error}</p>}
           </>
         )}
 
@@ -212,7 +213,7 @@ export default function PaymentModal({ state, actions }) {
             <span className="success-dispatch-icon">🎉</span>
             <h3>Worker Auto-Dispatched Successfully!</h3>
             <p>
-              <strong>{worker ? worker.name : 'Rohit Kumar'}</strong> is en route to your location.
+              <strong>{worker ? worker.name : 'Your assigned professional'}</strong> is en route to your location.
             </p>
             <div className="dispatch-eta-pill">
               ⚡ ETA: {worker ? worker.time : 5} mins • OTP Security Code: 4821

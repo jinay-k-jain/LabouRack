@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { submitEstimateDecision } from '../api.js';
 
 export default function CustomerEstimatePage({ state, actions, estimateOverride, onBack }) {
   // Default rich estimate model if not provided from state
@@ -8,7 +9,7 @@ export default function CustomerEstimatePage({ state, actions, estimateOverride,
     category: 'Water & Plumbing',
     categoryIcon: '💧',
     worker: {
-      name: 'Rohit Kumar',
+      name: 'Assigned professional',
       avatar: 'RK',
       rating: 4.9,
       reviews: 142,
@@ -82,38 +83,33 @@ export default function CustomerEstimatePage({ state, actions, estimateOverride,
   const aiBenchmark = estimate.aiPrediction?.predictedBenchmark || 4200;
   const variance = Math.round(((workerTotal - aiBenchmark) / aiBenchmark) * 100);
 
-  function handleAccept() {
+  async function sendDecision(decisionType, counterOffer = null) {
     setIsSubmitting(true);
-    setTimeout(() => {
-      setDecision('accepted');
-      setIsSubmitting(false);
-      if (actions?.showToast) {
-        actions.showToast('✅ Estimate Accepted! Rohit Kumar authorized to begin work.');
+    try {
+      if (estimate.bookingId) {
+        await submitEstimateDecision(estimate.bookingId, {
+          decision: decisionType,
+          counter_offer: counterOffer,
+          feedback: counterNote || null,
+        });
       }
-    }, 600);
+      setDecision(decisionType === 'counter_offer' ? 'counter_sent' : decisionType);
+      setIsSubmitting(false);
+      return true;
+    } catch (error) { setIsSubmitting(false); actions?.showToast(error.message || 'Unable to update the estimate.'); return false; }
   }
 
-  function handleReject() {
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setDecision('rejected');
-      setIsSubmitting(false);
-      if (actions?.showToast) {
-        actions.showToast('Estimate declined. Worker notified.');
-      }
-    }, 600);
+  async function handleAccept() {
+    if (await sendDecision('accepted')) actions?.showToast('Estimate accepted. Worker notified.');
   }
 
-  function handleSendCounter() {
+  async function handleReject() {
+    if (await sendDecision('rejected')) actions?.showToast('Estimate declined. Worker notified.');
+  }
+
+  async function handleSendCounter() {
     if (!counterAmount || counterAmount <= 0) return;
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setDecision('counter_sent');
-      setIsSubmitting(false);
-      if (actions?.showToast) {
-        actions.showToast(`💬 Counter-offer of ₹${counterAmount} sent to ${estimate.worker.name}!`);
-      }
-    }, 600);
+    if (await sendDecision('counter_offer', Number(counterAmount))) actions?.showToast(`Counter-offer of ₹${counterAmount} sent to the worker.`);
   }
 
   return (
@@ -188,7 +184,7 @@ export default function CustomerEstimatePage({ state, actions, estimateOverride,
             <div className="db-content">
               <h3>Estimate Approved by You!</h3>
               <p>
-                Rohit Kumar has been authorized to start the repair. A completion verification OTP{' '}
+                Your assigned professional has been authorized to start the repair. A completion verification OTP{' '}
                 <strong>[ 5824 ]</strong> will be required once the job is completed to your satisfaction.
               </p>
             </div>
@@ -228,7 +224,7 @@ export default function CustomerEstimatePage({ state, actions, estimateOverride,
             <div className="db-content">
               <h3>Counter-Offer of ₹{counterAmount} Sent to Worker!</h3>
               <p>
-                Rohit Kumar will review your proposal aligned with the AI Fair Market Benchmark (₹
+                Your assigned professional will review your proposal aligned with the AI Fair Market Benchmark (₹
                 {aiBenchmark}). You will be notified once he responds.
               </p>
             </div>

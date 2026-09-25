@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DUMMY_JOB_REQUESTS, SERVICE_CATEGORIES } from './workerData.js';
 import VoiceInputButton from '../../components/VoiceInputButton.jsx';
+import { acceptWorkerJob, getWorkerJobs, rejectWorkerJob, setWorkerAvailability, submitWorkerEstimate } from '../../api.js';
 
 // ─── Injected styles ──────────────────────────────────────────────────────────
 const HOME_STYLE = `
@@ -392,7 +393,7 @@ function MaterialRow({ mat, checked, onToggle }) {
 }
 
 // ─── Job Card ─────────────────────────────────────────────────────────────────
-function JobCard({ job, onAccept, onReject }) {
+function JobCard({ job, onAccept, onReject, onEstimate }) {
   const [checkedMaterials, setCheckedMaterials] = useState(
     job.materials.filter(m => m.required).map(m => m.name),
   );
@@ -460,14 +461,14 @@ function JobCard({ job, onAccept, onReject }) {
     setWorkerPhotos(prev => prev.filter(p => p.id !== id));
   };
 
-  const sendEstimate = () => {
+  const sendEstimate = async () => {
     const payload = {
       jobId: job.id,
       jobTitle: job.issue,
       category: job.category || 'General Repair',
       categoryIcon: job.categoryIcon || '🔧',
       worker: {
-        name: 'Rohit Kumar',
+        name: 'Assigned professional',
         avatar: 'RK',
         rating: 4.9,
         reviews: 142,
@@ -520,10 +521,15 @@ function JobCard({ job, onAccept, onReject }) {
     };
 
     try {
+      await onEstimate(job.id, {
+        labour_charge: prices.labour, materials_cost: materialsCost,
+        visiting_fee: prices.visitingFee, discount: prices.discount,
+        inspection_notes: note,
+        materials_needed: checkedMats.map(material => ({ name: material.name, price: material.price || 0 })),
+      });
       localStorage.setItem('labourack_current_estimate', JSON.stringify(payload));
-    } catch (_) {}
-
-    setEstimateSent(true);
+      setEstimateSent(true);
+    } catch (error) { window.alert(error.message || 'Unable to send estimate.'); }
   };
 
   // PENDING
@@ -825,20 +831,33 @@ function JobCard({ job, onAccept, onReject }) {
 // ─── Main Worker Home ─────────────────────────────────────────────────────────
 export default function WorkerHomePage({ worker, onSignOut }) {
   const [online, setOnline] = useState(true);
-  const [jobs, setJobs] = useState(DUMMY_JOB_REQUESTS);
+  const [jobs, setJobs] = useState([]);
   const [activePageTab, setActivePageTab] = useState('jobs');
 
   const workerName = worker?.name || 'Ravi Kumar';
   const workerCats = worker?.selectedCategories || ['electrical', 'plumbing'];
   const catLabels = SERVICE_CATEGORIES.filter(c => workerCats.includes(c.id));
 
-  const pendingJobs = jobs.filter(j => j.status === 'pending');
-  const acceptedJobs = jobs.filter(j => j.status === 'accepted');
+  const toUiJob = (job) => ({
+    ...job, status: job.status === 'new' ? 'pending' : job.status,
+    categoryIcon: SERVICE_CATEGORIES.find(category => category.id === job.category)?.icon || '🔧',
+    customer: job.customer_name || 'Customer', customerRating: '4.8', distance: job.distance_km || 2,
+    eta: '15 mins', postedAgo: 'just now', estimatedPay: job.labour_charge || 300,
+    description: job.description || 'Customer has shared a service request.',
+    materials: (job.materials_needed || []).map(item => typeof item === 'string' ? { name: item, required: true, price: 0 } : { ...item, required: true }),
+  });
+  const refreshJobs = () => getWorkerJobs().then(data => setJobs(data.map(toUiJob))).catch(() => setJobs([]));
+  useEffect(() => { refreshJobs(); }, []);
 
-  const acceptJob = (id) =>
-    setJobs(prev => prev.map(j => j.id === id ? { ...j, status: 'accepted' } : j));
-  const rejectJob = (id) =>
-    setJobs(prev => prev.map(j => j.id === id ? { ...j, status: 'rejected' } : j));
+  const pendingJobs = jobs.filter(j => j.status === 'pending');
+  const acceptedJobs = jobs.filter(j => ['accepted', 'estimate_sent', 'counter_offered', 'confirmed'].includes(j.status));
+  const acceptJob = async (id) => { await acceptWorkerJob(id); refreshJobs(); };
+  const rejectJob = async (id) => { await rejectWorkerJob(id); refreshJobs(); };
+  const sendEstimate = async (id, estimate) => { await submitWorkerEstimate(id, estimate); refreshJobs(); };
+  const toggleOnline = async () => {
+    const next = !online;
+    try { await setWorkerAvailability(next); setOnline(next); } catch (error) { window.alert(error.message); }
+  };
 
   const HISTORY = [
     { icon: '⚡', title: 'Fan Motor Replacement', sub: 'Indiranagar • 2 hrs', pay: 480, date: 'Sep 23' },
@@ -856,7 +875,7 @@ export default function WorkerHomePage({ worker, onSignOut }) {
           <span className="wh-badge">Worker Portal</span>
           <div
             className="wh-status-toggle"
-            onClick={() => setOnline(o => !o)}
+            onClick={toggleOnline}
             title="Toggle online status"
           >
             <span className={`status-dot ${online ? 'online' : 'offline'}`} />
@@ -1038,6 +1057,7 @@ export default function WorkerHomePage({ worker, onSignOut }) {
                       job={job}
                       onAccept={acceptJob}
                       onReject={rejectJob}
+                      onEstimate={sendEstimate}
                     />
                   ))
                 )}
@@ -1058,7 +1078,7 @@ export default function WorkerHomePage({ worker, onSignOut }) {
                   </div>
                 ) : (
                   acceptedJobs.map(job => (
-                    <JobCard key={job.id} job={job} onAccept={acceptJob} onReject={rejectJob} />
+                    <JobCard key={job.id} job={job} onAccept={acceptJob} onReject={rejectJob} onEstimate={sendEstimate} />
                   ))
                 )}
               </>

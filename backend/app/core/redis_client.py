@@ -49,7 +49,10 @@ async def store_otp(phone: str, otp: str) -> None:
 
 
 async def get_otp(phone: str) -> Optional[str]:
-    """Retrieve OTP from Redis (falls back to memory backup)."""
+    """Retrieve the freshly issued OTP, falling back to Redis across processes."""
+    cached = _memory_cache.get(f"{OTP_PREFIX}{phone}")
+    if cached:
+        return cached
     try:
         r = await get_redis()
         val = await r.get(f"{OTP_PREFIX}{phone}")
@@ -57,7 +60,7 @@ async def get_otp(phone: str) -> Optional[str]:
             return val
     except Exception:
         pass
-    return _memory_cache.get(f"{OTP_PREFIX}{phone}")
+    return None
 
 
 async def delete_otp(phone: str) -> None:

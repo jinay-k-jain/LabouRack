@@ -6,6 +6,7 @@ import {
   INITIAL_REG_STATE,
 } from './workerData.js';
 import VoiceInputButton from '../../components/VoiceInputButton.jsx';
+import { sendOtp as requestOtp, verifyOtp as confirmOtp } from '../../api.js';
 
 // mode: 'both' (default) — shows Login + Register tabs
 // mode: 'register-only' — shows only registration form (no tabs)
@@ -338,19 +339,24 @@ function LoginView({ onLogin }) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
 
-  const sendOtp = (e) => {
+  const sendOtp = async (e) => {
     e.preventDefault();
     if (phone.length !== 10) { setError('Enter a valid 10-digit mobile number.'); return; }
-    setError('');
-    setOtpSent(true);
+    try {
+      await requestOtp(phone, 'worker', 'login');
+      setError('');
+      setOtpSent(true);
+    } catch (err) { setError(err.message); }
   };
 
-  const verify = (e) => {
+  const verify = async (e) => {
     e.preventDefault();
     const code = otp.join('');
     if (code.length !== 6) { setError('Enter all 6 OTP digits.'); return; }
-    // Demo: any 6 digits work
-    onLogin({ phone, name: 'Ravi Kumar' });
+    try {
+      const account = await confirmOtp(phone, code, 'worker', 'login');
+      onLogin({ phone, name: account.name, ...account });
+    } catch (err) { setError(err.message); }
   };
 
   return (
@@ -386,7 +392,7 @@ function LoginView({ onLogin }) {
           <div className="wf-group">
             <label className="wf-label">Verification Code sent to +91 {phone}</label>
             <OtpBox otp={otp} setOtp={setOtp} />
-            <p className="otp-hint">💡 Demo: Enter any 6 digits to sign in.</p>
+            <p className="otp-hint">Enter the OTP sent to your registered mobile number.</p>
           </div>
           {error && <p className="field-error">{error}</p>}
           <button className="wauth-btn" type="submit">

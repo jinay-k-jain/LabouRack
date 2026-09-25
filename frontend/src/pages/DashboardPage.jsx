@@ -4,7 +4,7 @@ import ProfileMenu from '../components/ProfileMenu.jsx';
 import WorkerCard from '../components/WorkerCard.jsx';
 import HomeRepairFlowPage from './HomeRepairFlowPage.jsx';
 import AdminAnalyticsDashboard from './AdminAnalyticsDashboard.jsx';
-import { householdCategories, workerProfiles, popularHouseholdProblems } from '../appLogic.js';
+import { householdCategories, popularHouseholdProblems } from '../appLogic.js';
 
 export default function DashboardPage({ state, actions }) {
   const { role, searchQuery, dashboard } = state;
@@ -109,8 +109,8 @@ export default function DashboardPage({ state, actions }) {
               <span>LIVE TASK ACTIVE</span>
             </div>
 
-            {/* ── AI Estimate Inspection Alert Card ── */}
-            <div style={{
+            {/* Estimate alert only appears after a real worker submits one. */}
+            {state.activeBookings.some(booking => booking.job?.estimated_total) && <div style={{
               background: 'linear-gradient(135deg, rgba(16,185,129,.12), rgba(59,130,246,.1))',
               border: '1.5px solid rgba(16,185,129,.4)',
               borderRadius: 14,
@@ -139,11 +139,11 @@ export default function DashboardPage({ state, actions }) {
                       Estimate Ready
                     </span>
                     <strong style={{ fontSize: 14, color: 'var(--ink)' }}>
-                      Worker Rohit Kumar Submitted On-Site Quote (₹4,700)
+                      A worker submitted an on-site quote
                     </strong>
                   </div>
                   <p style={{ margin: 0, fontSize: 12, color: 'var(--muted)' }}>
-                    ✨ AI Market Benchmark: <strong style={{ color: '#10b981' }}>₹4,200</strong> • Includes parts + labor. Review photos &amp; accept/reject.
+                    Review the real estimate, then accept, reject, or make a counter-offer.
                   </p>
                 </div>
               </div>
@@ -169,7 +169,7 @@ export default function DashboardPage({ state, actions }) {
                 <span>Review Estimate &amp; AI Price</span>
                 <span>→</span>
               </button>
-            </div>
+            </div>}
 
             {state.activeBookings.map(b => (
               <div key={b.id} className="active-booking-card">
@@ -342,7 +342,7 @@ export default function DashboardPage({ state, actions }) {
               <span className="radar-status">🟢 14 Workers Online Now</span>
             </div>
             <div className="worker-list">
-              {workerProfiles.slice(0, 3).map(worker => (
+              {state.workerProfiles.slice(0, 3).map(worker => (
                 <WorkerCard
                   key={worker.name}
                   worker={worker}

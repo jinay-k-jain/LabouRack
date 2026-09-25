@@ -50,7 +50,7 @@ Need a specific estimate? Tell me what needs fixing.`,
 • You can **call the worker** directly or **cancel** if needed
 
 Your recent booking:
-🔧 **Water Tap Repair** — Worker Rohit Kumar is on-site
+🔧 **Water Tap Repair** — Your assigned worker is on-site
 📍 Status: Inspection Completed, Estimate Ready
 
 Would you like to review the estimate?`,

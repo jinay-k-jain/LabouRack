@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import WorkerCard from '../components/WorkerCard.jsx';
-import { householdCategories, workerProfiles, popularHouseholdProblems, initials } from '../appLogic.js';
+import { householdCategories, popularHouseholdProblems, initials } from '../appLogic.js';
 
 export default function HomeRepairFlowPage({ state, actions }) {
   const {
@@ -391,7 +391,7 @@ export default function HomeRepairFlowPage({ state, actions }) {
                 </span>
               </div>
               <div className="nearby-workers-horizontal-scroll">
-                {(state.homeRepair.workers.length ? state.homeRepair.workers : workerProfiles)
+                {state.homeRepair.workers
                   .slice(0, 4)
                   .map(worker => (
                     <div
