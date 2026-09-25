@@ -272,6 +272,15 @@ export default function AIChatbot() {
               autoFocus
             />
             <button
+              type="button"
+              className="chatbot-voice-btn"
+              onClick={() => {}}
+              title="Voice input coming soon"
+              aria-label="Voice input coming soon"
+            >
+              🎙
+            </button>
+            <button
               type="submit"
               className="chatbot-send-btn"
               disabled={!input.trim() || isTyping}

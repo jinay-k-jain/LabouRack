@@ -935,6 +935,13 @@ export default function WorkerHomePage({ worker, onSignOut }) {
                 </div>
                 <span className="ins-status pending">Enroll</span>
               </div>
+              <button
+                type="button"
+                className="ins-claim-btn"
+                onClick={() => window.alert('Insurance claims will be available here soon.')}
+              >
+                🛡️ Claim Insurance
+              </button>
             </div>
 
             <button

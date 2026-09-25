@@ -46,6 +46,15 @@ export default function DashboardPage({ state, actions }) {
                 placeholder="Search service, plumber, electrician..."
                 aria-label="Search for an issue or service"
               />
+              <button
+                type="button"
+                className="search-voice-button"
+                title="Voice search coming soon"
+                aria-label="Voice search coming soon"
+                onClick={() => actions.showToast('Voice search is coming soon.')}
+              >
+                🎙
+              </button>
               <button type="submit">Search</button>
             </form>
           )}
