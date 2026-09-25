@@ -15,16 +15,16 @@ const AUTH_STYLE = `
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0f1e;
-  --surface:#111827;
-  --card:#161f35;
-  --border:#1e2d4a;
-  --accent:#10b981;
-  --accent2:#3b82f6;
-  --warn:#f59e0b;
-  --text:#f1f5f9;
-  --muted:#64748b;
-  --subtle:#1e293b;
+  --bg:#f5f8f6;
+  --surface:#ffffff;
+  --card:#ffffff;
+  --border:#e3e8e4;
+  --accent:#0b6b46;
+  --accent2:#1d4ed8;
+  --warn:#d97706;
+  --text:#0f1914;
+  --muted:#617368;
+  --subtle:#f0f5f3;
   --radius:14px;
   --font:'Plus Jakarta Sans',sans-serif;
 }
@@ -32,16 +32,16 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 
 .wauth-wrap{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse 80% 60% at 50% 0%,#0d2a1f 0%,#0a0f1e 70%);
+  background:linear-gradient(135deg, #f0f5f3 0%, #e8f0ec 50%, #f5f8f6 100%);
   padding:24px;
 }
 .wauth-card{
   width:100%;max-width:520px;
-  background:var(--card);
-  border:1px solid var(--border);
+  background:#ffffff;
+  border:1px solid #e3e8e4;
   border-radius:24px;
   overflow:hidden;
-  box-shadow:0 32px 80px rgba(0,0,0,.5);
+  box-shadow:0 16px 48px rgba(15,25,20,.08), 0 4px 16px rgba(0,0,0,.04);
 }
 .wauth-brand{
   display:flex;align-items:center;gap:10px;
@@ -50,7 +50,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 }
 .wauth-logo{
   width:36px;height:36px;border-radius:10px;
-  background:linear-gradient(135deg,#10b981,#059669);
+  background:linear-gradient(135deg,#0b6b46,#059669);
   display:grid;place-items:center;
   font-size:18px;font-weight:900;color:#fff;
 }
@@ -109,12 +109,12 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 
 .wauth-btn{
   width:100%;padding:14px;border:none;border-radius:12px;
-  background:linear-gradient(135deg,#10b981,#059669);
+  background:linear-gradient(135deg,#0b6b46,#059669);
   color:#fff;font-size:15px;font-weight:700;
   cursor:pointer;transition:.2s;margin-top:4px;
   font-family:var(--font);
 }
-.wauth-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(16,185,129,.35);}
+.wauth-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(11,107,70,.25);}
 .wauth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .wauth-btn-outline{
   background:transparent;border:1px solid var(--border);
@@ -158,8 +158,8 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   border:1.5px solid var(--border);border-radius:12px;
   cursor:pointer;transition:.2s;font-family:var(--font);
 }
-.cat-btn:hover{border-color:var(--accent);background:rgba(16,185,129,.07);}
-.cat-btn.selected{border-color:var(--accent);background:rgba(16,185,129,.12);}
+.cat-btn:hover{border-color:var(--accent);background:rgba(11,107,70,.04);}
+.cat-btn.selected{border-color:var(--accent);background:rgba(11,107,70,.08);}
 .cat-icon{font-size:22px;width:36px;height:36px;display:grid;place-items:center;}
 .cat-label{font-size:13px;font-weight:600;color:var(--text);}
 
@@ -171,7 +171,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   border:1px solid var(--border);background:var(--subtle);
   color:var(--muted);cursor:pointer;transition:.2s;
 }
-.skill-pill.selected{background:rgba(59,130,246,.2);border-color:var(--accent2);color:#60a5fa;}
+.skill-pill.selected{background:rgba(29,78,216,.08);border-color:var(--accent2);color:#1d4ed8;}
 
 /* EXPERIENCE PILLS */
 .exp-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
@@ -180,7 +180,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   border:1px solid var(--border);background:var(--subtle);color:var(--muted);
   cursor:pointer;transition:.2s;
 }
-.exp-pill.selected{background:rgba(16,185,129,.15);border-color:var(--accent);color:var(--accent);}
+.exp-pill.selected{background:rgba(11,107,70,.08);border-color:var(--accent);color:var(--accent);}
 
 /* TIME RANGE */
 .time-range-row{display:flex;gap:12px;align-items:center;}
@@ -206,7 +206,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   font-size:13px;font-weight:600;color:var(--muted);
   cursor:pointer;transition:.2s;background:var(--subtle);
 }
-.gender-pill.selected{border-color:var(--accent2);background:rgba(59,130,246,.15);color:#60a5fa;}
+.gender-pill.selected{border-color:var(--accent2);background:rgba(29,78,216,.06);color:#1d4ed8;}
 
 /* LANGUAGE PILLS */
 .lang-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
@@ -234,10 +234,10 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 }
 .success-icon-big{
   width:80px;height:80px;border-radius:50%;
-  background:linear-gradient(135deg,#10b981,#059669);
+  background:linear-gradient(135deg,#0b6b46,#059669);
   display:grid;place-items:center;
   font-size:36px;margin:0 auto 20px;
-  box-shadow:0 16px 40px rgba(16,185,129,.3);
+  box-shadow:0 16px 40px rgba(11,107,70,.2);
 }
 .success-title{font-size:24px;font-weight:800;margin-bottom:8px;}
 .success-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
@@ -250,7 +250,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   font-family:var(--font);cursor:pointer;
 }
 .wf-select:focus{outline:none;border-color:var(--accent);}
-.wf-select option{background:var(--surface);}
+.wf-select option{background:#ffffff;}
 
 /* TEXTAREA */
 .wf-textarea{
@@ -658,7 +658,7 @@ function Step3({ data, setData, onNext, onBack }) {
     <form onSubmit={submit}>
       <p className="section-eyebrow">Step 3 — Aadhaar Identity Verification</p>
 
-      <div style={{ background: 'rgba(16,185,129,.08)', border: '1px solid rgba(16,185,129,.2)', borderRadius: 12, padding: '12px 14px', marginBottom: 20, fontSize: 13, color: '#6ee7b7', lineHeight: 1.5 }}>
+      <div style={{ background: 'rgba(11,107,70,.06)', border: '1px solid rgba(11,107,70,.15)', borderRadius: 12, padding: '12px 14px', marginBottom: 20, fontSize: 13, color: '#0b6b46', lineHeight: 1.5 }}>
         🛡️ Your Aadhaar number is <strong>encrypted end-to-end</strong>. We use UIDAI-compliant hashing — it is <strong>never stored in plain text</strong> or displayed to customers.
       </div>
 
@@ -699,7 +699,7 @@ function Step3({ data, setData, onNext, onBack }) {
       )}
 
       {data.aadhaarVerified && (
-        <div style={{ background: 'rgba(16,185,129,.1)', border: '1px solid rgba(16,185,129,.3)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#6ee7b7', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ background: 'rgba(11,107,70,.06)', border: '1px solid rgba(11,107,70,.2)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#0b6b46', display: 'flex', alignItems: 'center', gap: 8 }}>
           ✅ Aadhaar KYC successfully verified!
         </div>
       )}
@@ -821,6 +821,89 @@ function Step4({ data, setData, onNext, onBack }) {
           onChange={e => setData({ ...data, experienceDesc: e.target.value })}
           placeholder="e.g. 7 years of domestic electrical work. Expert in fan motor repair, MCB fitting, CCTV wiring, and inverter installation across Bengaluru."
         />
+      </div>
+
+      {/* CERTIFICATE PHOTO UPLOAD — Optional */}
+      <div className="wf-group">
+        <label className="wf-label">Certificates / Credentials (Optional)</label>
+        <p className="field-note" style={{ marginTop: 0, marginBottom: 8 }}>
+          📜 Upload photos of ITI certificates, trade licenses, skill certifications, or any credentials that validate your expertise. This helps build customer trust.
+        </p>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          id="cert-photo-input"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const files = e.target.files;
+            if (!files || !files.length) return;
+            const certs = [...(data.certificates || [])];
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                certs.push({
+                  id: 'cert_' + Date.now() + '_' + i,
+                  name: file.name,
+                  dataUrl: ev.target.result,
+                });
+                setData({ ...data, certificates: [...certs] });
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+        />
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          {(data.certificates || []).map(cert => (
+            <div key={cert.id} style={{
+              position: 'relative', width: 80, height: 80, borderRadius: 10,
+              overflow: 'hidden', border: '1.5px solid var(--border)',
+              background: 'var(--subtle)',
+            }}>
+              <img src={cert.dataUrl} alt={cert.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <button
+                type="button"
+                onClick={() => setData({
+                  ...data,
+                  certificates: (data.certificates || []).filter(c => c.id !== cert.id),
+                })}
+                style={{
+                  position: 'absolute', top: 3, right: 3,
+                  background: 'rgba(220,38,38,.9)', color: '#fff', border: 'none',
+                  borderRadius: '50%', width: 20, height: 20, fontSize: 10,
+                  cursor: 'pointer', display: 'grid', placeItems: 'center',
+                }}
+              >✕</button>
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0,
+                background: 'rgba(0,0,0,.6)', color: '#fff',
+                fontSize: 8, padding: '2px 4px', textAlign: 'center',
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {cert.name}
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => document.getElementById('cert-photo-input').click()}
+            style={{
+              padding: '16px 20px', borderRadius: 10,
+              border: '2px dashed var(--border)', background: 'var(--subtle)',
+              color: 'var(--muted)', fontSize: 12, fontWeight: 600,
+              cursor: 'pointer', display: 'flex', flexDirection: 'column',
+              alignItems: 'center', gap: 4, minWidth: 100, textAlign: 'center',
+              transition: '.2s',
+            }}
+          >
+            <span style={{ fontSize: 24 }}>📄</span>
+            <span>{(data.certificates || []).length > 0 ? '+ Add More' : 'Upload Certificate'}</span>
+          </button>
+        </div>
+        <p className="field-note" style={{ marginTop: 6 }}>
+          Accepted: JPG, PNG. Max 5 files. These are shown to admins during verification only.
+        </p>
       </div>
 
       <div className="wf-group">

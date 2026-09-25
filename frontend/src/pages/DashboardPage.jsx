@@ -4,12 +4,14 @@ import ProfileMenu from '../components/ProfileMenu.jsx';
 import WorkerCard from '../components/WorkerCard.jsx';
 import HomeRepairFlowPage from './HomeRepairFlowPage.jsx';
 import AdminAnalyticsDashboard from './AdminAnalyticsDashboard.jsx';
+import AIChatbot from '../components/AIChatbot.jsx';
 import { householdCategories, workerProfiles, popularHouseholdProblems } from '../appLogic.js';
 
 export default function DashboardPage({ state, actions }) {
   const { role, searchQuery, dashboard } = state;
   const customer = role === 'customer';
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
   // Show the home repair sub-flow for customers when active
   if (customer && state.homeRepair.view !== 'home') {
@@ -49,19 +51,20 @@ export default function DashboardPage({ state, actions }) {
             </form>
           )}
 
-          {/* ROLE QUICK SWITCHER PILL */}
-          <div className="header-role-switcher" aria-label="Role preview">
-            {['customer', 'worker', 'admin'].map(r => (
-              <button
-                key={r}
-                className={'role-pill ' + (role === r ? 'active' : '')}
-                type="button"
-                onClick={() => actions.setRole(r)}
-              >
-                {r === 'customer' ? 'Customer' : r === 'worker' ? 'Gig Worker' : 'Admin'}
-              </button>
-            ))}
-          </div>
+          {/* EMERGENCY SOS BUTTON (Customer only) */}
+          {customer && (
+            <button
+              type="button"
+              className="emergency-sos-btn"
+              onClick={() => setShowEmergencyModal(true)}
+              aria-label="Emergency SOS"
+            >
+              <span className="sos-pulse" />
+              <span className="sos-icon">🚨</span>
+              <span className="sos-text">Emergency SOS</span>
+            </button>
+          )}
+
 
           <div className="dashboard-actions">
             {customer && (
@@ -481,6 +484,83 @@ export default function DashboardPage({ state, actions }) {
           </section>
         )}
       </section>
+
+      {/* AI CHATBOT — Customer only */}
+      {customer && <AIChatbot />}
+
+      {/* EMERGENCY SOS MODAL */}
+      {showEmergencyModal && (
+        <div className="modal-backdrop" onClick={() => setShowEmergencyModal(false)}>
+          <div className="emergency-modal" onClick={e => e.stopPropagation()}>
+            <div className="emergency-modal-header">
+              <div className="emergency-modal-title">
+                <span style={{ fontSize: 28 }}>🚨</span>
+                <div>
+                  <h3>Emergency SOS</h3>
+                  <p>Get immediate help for urgent situations</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setShowEmergencyModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="emergency-contacts">
+              <a href="tel:100" className="emergency-contact-card police">
+                <span className="ec-icon">🚔</span>
+                <div>
+                  <strong>Police</strong>
+                  <span>Dial 100</span>
+                </div>
+                <span className="ec-call">📞 Call Now</span>
+              </a>
+              <a href="tel:108" className="emergency-contact-card ambulance">
+                <span className="ec-icon">🚑</span>
+                <div>
+                  <strong>Ambulance</strong>
+                  <span>Dial 108</span>
+                </div>
+                <span className="ec-call">📞 Call Now</span>
+              </a>
+              <a href="tel:101" className="emergency-contact-card fire">
+                <span className="ec-icon">🔥</span>
+                <div>
+                  <strong>Fire Brigade</strong>
+                  <span>Dial 101</span>
+                </div>
+                <span className="ec-call">📞 Call Now</span>
+              </a>
+              <a href="tel:1906" className="emergency-contact-card gas">
+                <span className="ec-icon">⛽</span>
+                <div>
+                  <strong>Gas Leak</strong>
+                  <span>Dial 1906</span>
+                </div>
+                <span className="ec-call">📞 Call Now</span>
+              </a>
+            </div>
+
+            <div className="emergency-quick-help">
+              <h4>🔧 Urgent Home Repair?</h4>
+              <p>Our emergency workers are available 24/7 for critical home repairs.</p>
+              <button
+                type="button"
+                className="emergency-request-btn"
+                onClick={() => {
+                  setShowEmergencyModal(false);
+                  actions.showToast('🚨 Emergency request sent! Nearest worker will contact you within 2 minutes.');
+                }}
+              >
+                ⚡ Request Emergency Worker Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

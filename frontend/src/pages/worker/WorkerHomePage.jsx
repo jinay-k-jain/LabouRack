@@ -7,9 +7,9 @@ const HOME_STYLE = `
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0f1e;--surface:#111827;--card:#161f35;--border:#1e2d4a;
-  --accent:#10b981;--accent2:#3b82f6;--warn:#f59e0b;--danger:#ef4444;
-  --text:#f1f5f9;--muted:#64748b;--subtle:#1e293b;
+  --bg:#f5f8f6;--surface:#ffffff;--card:#ffffff;--border:#e3e8e4;
+  --accent:#0b6b46;--accent2:#1d4ed8;--warn:#d97706;--danger:#dc2626;
+  --text:#0f1914;--muted:#617368;--subtle:#f0f5f3;
   --radius:14px;--font:'Plus Jakarta Sans',sans-serif;
 }
 html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:var(--text)}
@@ -25,7 +25,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 .wh-brand{font-size:17px;font-weight:800;}
 .wh-brand span{color:var(--accent);}
 .wh-badge{
-  font-size:11px;background:rgba(16,185,129,.15);color:#34d399;
+  font-size:11px;background:rgba(11,107,70,.1);color:#0b6b46;
   padding:4px 10px;border-radius:20px;font-weight:700;border:1px solid rgba(16,185,129,.3);
 }
 .wh-status-toggle{
@@ -37,11 +37,11 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 }
 .wh-status-toggle:hover{border-color:var(--accent);}
 .status-dot{width:8px;height:8px;border-radius:50%;transition:.3s;}
-.status-dot.online{background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.25);}
-.status-dot.offline{background:var(--muted);}
+.status-dot.online{background:#0b6b46;box-shadow:0 0 0 3px rgba(11,107,70,.2);}
+.status-dot.offline{background:#94a3b8;}
 .wh-avatar{
   width:36px;height:36px;border-radius:50%;
-  background:linear-gradient(135deg,#10b981,#059669);
+  background:linear-gradient(135deg,#0b6b46,#059669);
   display:grid;place-items:center;
   font-size:14px;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0;
 }
@@ -62,7 +62,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   padding:16px;display:flex;flex-direction:column;gap:6px;
   transition:.2s;
 }
-.stat-card:hover{border-color:var(--border);box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.stat-card:hover{border-color:#d4ded7;box-shadow:0 4px 16px rgba(15,25,20,.08);}
 .stat-icon{font-size:22px;}
 .stat-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
 .stat-val{font-size:22px;font-weight:800;color:var(--text);}
@@ -75,14 +75,14 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 }
 .sb-avatar{
   width:56px;height:56px;border-radius:50%;
-  background:linear-gradient(135deg,#10b981,#059669);
+  background:linear-gradient(135deg,#0b6b46,#059669);
   display:grid;place-items:center;
   font-size:20px;font-weight:800;color:#fff;
-  border:3px solid rgba(16,185,129,.4);
+  border:3px solid rgba(11,107,70,.3);
 }
 .sb-name{font-size:15px;font-weight:700;}
-.sb-role{font-size:12px;color:var(--accent);font-weight:600;}
-.sb-rating{font-size:13px;color:var(--warn);font-weight:700;}
+.sb-role{font-size:12px;color:#0b6b46;font-weight:600;}
+.sb-rating{font-size:13px;color:#d97706;font-weight:700;}
 
 .sb-stats{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
 .sb-stat{background:var(--subtle);border-radius:8px;padding:10px;text-align:center;}
@@ -93,12 +93,12 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 .sb-cats{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
 .sb-cat-tag{
   font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;
-  background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#60a5fa;
+  background:rgba(29,78,216,.08);border:1px solid rgba(29,78,216,.2);color:#1d4ed8;
 }
 .sb-avail{
   width:100%;padding:10px 14px;border-radius:10px;
-  background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);
-  font-size:12px;color:#34d399;text-align:center;font-weight:600;
+  background:rgba(11,107,70,.06);border:1px solid rgba(11,107,70,.15);
+  font-size:12px;color:#0b6b46;text-align:center;font-weight:600;
 }
 
 /* JOB CARDS */
@@ -111,22 +111,22 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;
   background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:var(--warn);
 }
-.jobs-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.2);margin-right:5px;animation:pulse 1.5s infinite;}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(16,185,129,.2)}50%{box-shadow:0 0 0 6px rgba(16,185,129,.05)}}
+.jobs-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#0b6b46;box-shadow:0 0 0 3px rgba(11,107,70,.15);margin-right:5px;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(11,107,70,.15)}50%{box-shadow:0 0 0 6px rgba(11,107,70,.05)}}
 
 .job-card{
   background:var(--card);border:1px solid var(--border);border-radius:18px;
   margin-bottom:16px;overflow:hidden;transition:.3s;
 }
-.job-card:hover{border-color:rgba(59,130,246,.4);box-shadow:0 8px 32px rgba(0,0,0,.35);}
-.job-card.accepted{border-color:rgba(16,185,129,.4);}
+.job-card:hover{border-color:#c5d0c8;box-shadow:0 8px 24px rgba(15,25,20,.08);}
+.job-card.accepted{border-color:rgba(11,107,70,.35);}
 .job-card.rejected{opacity:.45;}
 
 .job-card-top{padding:18px 20px;display:flex;gap:14px;align-items:flex-start;}
 .job-cat-badge{
   width:46px;height:46px;border-radius:14px;
   display:grid;place-items:center;font-size:22px;flex-shrink:0;
-  background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2);
+  background:rgba(29,78,216,.08);border:1px solid rgba(29,78,216,.15);
 }
 .job-info{flex:1;}
 .job-urgency-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
@@ -134,8 +134,8 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;
   text-transform:uppercase;letter-spacing:.06em;
 }
-.job-urgency.urgent{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.2);}
-.job-urgency.normal{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.2);}
+.job-urgency.urgent{background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.15);}
+.job-urgency.normal{background:rgba(29,78,216,.08);color:#1d4ed8;border:1px solid rgba(29,78,216,.15);}
 .job-posted{font-size:11px;color:var(--muted);}
 .job-title{font-size:16px;font-weight:800;margin-bottom:4px;}
 .job-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:10px;}
@@ -158,10 +158,10 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   font-family:var(--font);transition:.2s;
 }
 .job-btn:hover{transform:translateY(-1px);}
-.job-btn.accept{background:linear-gradient(135deg,#10b981,#059669);color:#fff;}
-.job-btn.accept:hover{box-shadow:0 6px 20px rgba(16,185,129,.35);}
-.job-btn.reject{background:var(--subtle);border:1px solid var(--border);color:var(--muted);}
-.job-btn.reject:hover{border-color:var(--danger);color:#f87171;}
+.job-btn.accept{background:linear-gradient(135deg,#0b6b46,#059669);color:#fff;}
+.job-btn.accept:hover{box-shadow:0 6px 20px rgba(11,107,70,.25);}
+.job-btn.reject{background:#f8faf9;border:1px solid var(--border);color:var(--muted);}
+.job-btn.reject:hover{border-color:var(--danger);color:#dc2626;}
 
 /* JOB EXPANDED (accepted) */
 .job-expanded{background:var(--subtle);border-top:1px solid var(--border);}
@@ -287,7 +287,73 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
   border:none;background:none;color:var(--muted);cursor:pointer;border-radius:9px;
   transition:.2s;font-family:var(--font);
 }
-.page-tab.active{background:var(--accent2);color:#fff;}
+.page-tab.active{background:var(--accent);color:#fff;}
+
+/* INSURANCE SECTION */
+.sb-insurance{width:100%;display:flex;flex-direction:column;gap:8px;}
+.insurance-card{
+  display:flex;align-items:center;gap:10px;
+  padding:12px;background:var(--card);border:1px solid var(--border);
+  border-radius:10px;transition:.2s;
+}
+.insurance-card:hover{border-color:var(--accent);}
+.insurance-card.active-plan{border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.06);}
+.insurance-card.pending-plan{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.06);}
+.ins-icon{font-size:22px;flex-shrink:0;}
+.ins-info{flex:1;}
+.ins-name{font-size:12px;font-weight:700;color:var(--text);}
+.ins-detail{font-size:10px;color:var(--muted);margin-top:1px;}
+.ins-status{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;
+  white-space:nowrap;
+}
+.ins-status.active{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.25);}
+.ins-status.pending{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.25);}
+.ins-status.expired{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);}
+
+.ins-banner{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;margin-bottom:16px;
+}
+.ins-banner-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.ins-banner-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.ins-banner-badge{
+  font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;
+  background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.25);
+}
+.ins-plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.ins-plan-card{
+  padding:14px;background:var(--subtle);border:1px solid var(--border);
+  border-radius:12px;text-align:center;transition:.2s;cursor:pointer;
+}
+.ins-plan-card:hover{border-color:var(--accent);}
+.ins-plan-icon{font-size:28px;margin-bottom:6px;}
+.ins-plan-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.ins-plan-cover{font-size:11px;color:var(--accent);font-weight:600;}
+.ins-plan-premium{font-size:10px;color:var(--muted);margin-top:4px;}
+.ins-plan-status{
+  display:inline-block;margin-top:6px;font-size:10px;font-weight:700;
+  padding:3px 8px;border-radius:6px;
+}
+.ins-plan-status.active{background:rgba(16,185,129,.15);color:#34d399;}
+.ins-plan-status.available{background:rgba(59,130,246,.12);color:#60a5fa;}
+.ins-claim-btn{
+  margin-top:14px;width:100%;padding:12px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent2),#2563eb);
+  color:#fff;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:var(--font);transition:.2s;
+}
+.ins-claim-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(59,130,246,.35);}
+
+@media(max-width:1024px){
+  .ins-plans-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .ins-plans-grid{grid-template-columns:1fr;}
+}
 
 /* RESPONSIVE */
 @media(max-width:768px){
@@ -837,6 +903,34 @@ export default function WorkerHomePage({ worker, onSignOut }) {
               <span style={{ color: 'var(--accent)', fontWeight: 600 }}>🟢 Active in 3 km radius</span>
             </div>
 
+            <p className="sb-section">Insurance & Protection</p>
+            <div className="sb-insurance">
+              <div className="insurance-card active-plan">
+                <span className="ins-icon">🛡️</span>
+                <div className="ins-info">
+                  <p className="ins-name">Accident Insurance</p>
+                  <p className="ins-detail">Up to ₹2,00,000 cover</p>
+                </div>
+                <span className="ins-status active">Active</span>
+              </div>
+              <div className="insurance-card active-plan">
+                <span className="ins-icon">❤️</span>
+                <div className="ins-info">
+                  <p className="ins-name">Health Cover</p>
+                  <p className="ins-detail">₹50,000 annual</p>
+                </div>
+                <span className="ins-status active">Active</span>
+              </div>
+              <div className="insurance-card pending-plan">
+                <span className="ins-icon">🔧</span>
+                <div className="ins-info">
+                  <p className="ins-name">Tool Protection</p>
+                  <p className="ins-detail">Equipment damage cover</p>
+                </div>
+                <span className="ins-status pending">Enroll</span>
+              </div>
+            </div>
+
             <button
               onClick={onSignOut}
               style={{ marginTop: 'auto', padding: '10px', background: 'none', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font)' }}
@@ -868,6 +962,7 @@ export default function WorkerHomePage({ worker, onSignOut }) {
                 <span className="stat-sub">142 reviews</span>
               </div>
             </div>
+
 
             {/* PAGE TABS */}
             <div className="page-tabs">
