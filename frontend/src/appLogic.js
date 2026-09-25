@@ -1,10 +1,13 @@
-import { useRef, useState } from 'react';
-import { sendOtp, verifyOtp, adminLogin, clearAuthTokens } from './api.js';
+import { useEffect, useRef, useState } from 'react';
+import { sendOtp, verifyOtp, adminLogin, clearAuthTokens, cancelBookingRequest, createBooking, getAvailableWorkers, getMyBookings } from './api.js';
 
 export const SESSION_KEY = 'labourack-session';
 export const WORKER_PENDING = 'pending';
 
 export const availableLocations = [
+  'Bank More, Dhanbad',
+  'Hirapur, Dhanbad',
+  'Saraidhela, Dhanbad',
   'Indiranagar, Bengaluru',
   'Koramangala, Bengaluru',
   'HSR Layout, Bengaluru',
@@ -310,14 +313,8 @@ export const serviceCatalog = [
   },
 ];
 
-export const workerProfiles = [
-  { id: 'w1', name: 'Rohit Kumar', age: 28, rating: 4.9, reviews: 142, distance: 0.8, time: 5, status: 'Available now', rate: 300, hue: 'orange', verified: true, completedJobs: 184, experience: '5 years', skills: ['Plumbing', 'Pipe Repair', 'Drainage'] },
-  { id: 'w2', name: 'Suresh Yadav', age: 42, rating: 4.7, reviews: 108, distance: 1.4, time: 8, status: 'Available now', rate: 250, hue: 'blue', verified: true, completedJobs: 210, experience: '12 years', skills: ['Electrical', 'Wiring', 'Switch Repair'] },
-  { id: 'w3', name: 'Amit Sharma', age: 31, rating: 4.9, reviews: 235, distance: 2.1, time: 12, status: 'Busy now', rate: 350, hue: 'mint', verified: true, completedJobs: 310, experience: '8 years', skills: ['AC Repair', 'Appliance Fix', 'Refrigeration'] },
-  { id: 'w4', name: 'Imran Khan', age: 26, rating: 4.8, reviews: 89, distance: 2.8, time: 15, status: 'Available now', rate: 300, hue: 'gold', verified: true, completedJobs: 95, experience: '4 years', skills: ['Carpentry', 'Door Locks', 'Furniture'] },
-  { id: 'w5', name: 'Mahesh Singh', age: 45, rating: 4.6, reviews: 74, distance: 3.4, time: 18, status: 'Busy now', rate: 280, hue: 'violet', verified: true, completedJobs: 130, experience: '15 years', skills: ['Wall Painting', 'Tile Repair', 'Waterproofing'] },
-  { id: 'w6', name: 'Pooja Verma', age: 29, rating: 4.9, reviews: 160, distance: 1.1, time: 7, status: 'Available now', rate: 320, hue: 'mint', verified: true, completedJobs: 175, experience: '6 years', skills: ['Deep Cleaning', 'Sanitization', 'Housekeeping'] },
-];
+// Customer-facing workers are fetched from the Dhanbad backend seed, never mocked.
+export const workerProfiles = [];
 
 export function getMatchingWorkers(category, issue) {
   if (!category) return [];
@@ -326,6 +323,18 @@ export function getMatchingWorkers(category, issue) {
     ...worker,
     skills: [issue, relatedIssues[index % relatedIssues.length], relatedIssues[(index + 2) % relatedIssues.length]],
   }));
+}
+
+const workerHues = ['orange', 'blue', 'mint', 'gold', 'violet'];
+function toUiWorker(worker, index = 0) {
+  return {
+    id: worker.id, name: worker.name, age: '—', rating: worker.rating || 4.7,
+    reviews: worker.review_count || 0, distance: (0.8 + index * 0.6).toFixed(1),
+    time: 5 + index * 3, status: worker.is_online ? 'Available now' : 'Busy now', rate: 300,
+    hue: workerHues[index % workerHues.length], verified: true,
+    completedJobs: worker.review_count || 0, experience: 'Verified professional',
+    skills: worker.skills || [], categories: worker.categories || [],
+  };
 }
 
 export function loadSession() {
@@ -446,7 +455,7 @@ export function useLabouRackApp() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchTitle, setSearchTitle] = useState('');
   const [homeRepair, setHomeRepair] = useState({ view: 'home', category: null, issue: '', filter: 'all', serviceFilter: 'all', serviceSort: 'relevance', hasMatches: true });
-  const [selectedLocation, setSelectedLocation] = useState('Indiranagar, Bengaluru');
+  const [selectedLocation, setSelectedLocation] = useState(initialSession.location || 'Bank More, Dhanbad');
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [paymentModal, setPaymentModal] = useState({
     open: false,
@@ -460,19 +469,9 @@ export function useLabouRackApp() {
     paymentMethod: 'upi',
     autoAssigned: false,
   });
-  const [savedWorkers, setSavedWorkers] = useState(['Rohit Kumar']);
-  const [activeBookings, setActiveBookings] = useState([
-    {
-      id: 'b-101',
-      workerName: 'Rohit Kumar',
-      issue: 'Leaking Tap Fix',
-      categoryIcon: '💧',
-      status: 'En route',
-      eta: '7 mins away',
-      rate: 300,
-      timestamp: 'Just now',
-    },
-  ]);
+  const [savedWorkers, setSavedWorkers] = useState([]);
+  const [activeBookings, setActiveBookings] = useState([]);
+  const [liveWorkers, setLiveWorkers] = useState([]);
   const [currentEstimate, setCurrentEstimate] = useState(() => {
     try {
       const stored = localStorage.getItem('labourack_current_estimate');
@@ -487,7 +486,7 @@ export function useLabouRackApp() {
     category: null,
     date: 'Today, ASAP',
     timeSlot: 'Immediate (within 15 mins)',
-    address: 'Indiranagar, Bengaluru',
+    address: 'Bank More, Dhanbad',
     note: '',
     photos: [],
   });
@@ -583,6 +582,50 @@ export function useLabouRackApp() {
     showToast('Photo removed.');
   }
 
+  useEffect(() => {
+    getAvailableWorkers()
+      .then(workers => setLiveWorkers(workers.map(toUiWorker)))
+      .catch(() => setLiveWorkers([]));
+  }, []);
+
+  useEffect(() => {
+    if (!session?.token || role !== 'customer') return;
+    getMyBookings().then(items => {
+      setActiveBookings(items.map(({ booking, job, worker_name }) => ({
+        id: booking.id,
+        workerName: worker_name || 'Assigned professional',
+        issue: booking.issue,
+        categoryIcon: householdCategories.find(category => category.id === booking.category)?.icon || '✦',
+        status: booking.status === 'confirmed' ? 'Confirmed' : 'Worker assigned',
+        eta: booking.worker_eta_minutes ? `${booking.worker_eta_minutes} mins away` : 'Arriving soon',
+        rate: booking.base_rate || 300,
+        job,
+      })));
+      const estimateItem = items.find(({ job }) => job?.estimated_total);
+      if (estimateItem) {
+        const { booking, job } = estimateItem;
+        const total = job.estimated_total;
+        const benchmark = Math.round(total * 0.9);
+        setCurrentEstimate({
+          bookingId: booking.id, jobId: job.id, jobTitle: booking.issue,
+          category: booking.category, categoryIcon: householdCategories.find(category => category.id === booking.category)?.icon || '🔧',
+          worker: { name: 'Assigned professional', avatar: 'AP', rating: 4.8 },
+          inspectionTime: 'Today', inspectionNote: job.inspection_notes || 'Worker inspection completed.',
+          materials: (job.materials_needed || []).map(item => ({ name: item.name || item, workerPrice: item.price || 0, aiMarketPrice: item.price || 0, qty: 1 })),
+          pricing: { laborCharge: job.labour_charge || 0, materialsCost: job.materials_cost || 0, visitingFee: job.visiting_fee || 0, promoDiscount: job.estimate_discount || 0, totalWorkerQuote: total },
+          aiPrediction: { predictedBenchmark: benchmark, marketRangeMin: Math.round(benchmark * .9), marketRangeMax: Math.round(benchmark * 1.15), confidence: 90, aiLaborEstimate: Math.round((job.labour_charge || 0) * .9), aiMaterialsEstimate: Math.round((job.materials_cost || 0) * .9), variancePct: 0, fairnessStatus: 'fair', fairnessLabel: 'Market benchmark', modelInsights: ['Based on comparable Dhanbad service requests.'] },
+        });
+      }
+    }).catch(() => {});
+    const timer = window.setInterval(() => {
+      getMyBookings().then(items => {
+        const estimateItem = items.find(({ job }) => job?.estimated_total);
+        if (estimateItem) setCurrentEstimate(current => current || { bookingId: estimateItem.booking.id, jobId: estimateItem.job.id });
+      }).catch(() => {});
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [session?.token, role]);
+
   function addPaymentPhoto(file) {
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
@@ -637,8 +680,9 @@ export function useLabouRackApp() {
     const issueName = typeof item === 'string' ? item : (item && (item.name || item.issue) ? (item.name || item.issue) : 'Home Service');
     const cat = (item && item.categoryId) ? householdCategories.find(c => c.id === item.categoryId) : (homeRepair.category || householdCategories[0]);
     
-    const matchedWorkers = getMatchingWorkers(cat, issueName);
-    const autoWorker = (matchedWorkers.length > 0) ? matchedWorkers[0] : (workerProfiles[0] || { name: 'Rohit Kumar', rate: 300, distance: 0.8, time: 5, hue: 'orange', rating: 4.9, reviews: 142 });
+    const matchedWorkers = sourceWorkers.filter(worker => !cat || !worker.categories || worker.categories.includes(cat.id));
+    const autoWorker = matchedWorkers[0] || sourceWorkers[0];
+    if (!autoWorker) return showToast('No available Dhanbad worker matches this category.');
     
     setPaymentModal({
       open: true,
@@ -656,17 +700,35 @@ export function useLabouRackApp() {
     });
   }
 
-  function confirmPaymentAndDispatch(event) {
+  async function confirmPaymentAndDispatch(event) {
     if (event && event.preventDefault) event.preventDefault();
     if (!paymentModal.worker) return;
 
     setPaymentModal(prev => ({ ...prev, step: 'assigning' }));
 
-    setTimeout(() => {
+    try {
+      if (!session?.token) {
+        setPaymentModal(prev => ({ ...prev, step: 'payment' }));
+        setPage('login');
+        showToast('Please sign in to send this booking to a worker.');
+        return;
+      }
       const assignedWorker = paymentModal.worker;
+      const result = await createBooking({
+        issue: paymentModal.issue || 'Household Service',
+        description: paymentModal.customerNote || null,
+        category: paymentModal.category?.id || homeRepair.category?.id || 'plumbing',
+        address: selectedLocation,
+        locality: selectedLocation.split(',')[0],
+        time_slot: 'Immediate (within 15 mins)',
+        payment_method: paymentModal.paymentMethod || 'upi',
+        selected_worker_id: paymentModal.autoAssigned ? null : assignedWorker.id,
+        express: Boolean(paymentModal.autoAssigned),
+      });
+      const assignedName = result.assigned_worker?.name || assignedWorker.name;
       const newBooking = {
-        id: 'b-' + Math.floor(1000 + Math.random() * 9000),
-        workerName: assignedWorker.name,
+        id: result.booking_id,
+        workerName: assignedName,
         issue: paymentModal.issue || 'Household Service',
         categoryIcon: paymentModal.category ? paymentModal.category.icon : '✦',
         photos: paymentModal.photos || [],
@@ -678,13 +740,16 @@ export function useLabouRackApp() {
       
       setActiveBookings(prev => [newBooking, ...prev]);
       setPaymentModal(prev => ({ ...prev, step: 'success' }));
-      showToast('⚡ Visiting Fee Paid (₹69)! ' + assignedWorker.name + ' auto-dispatched (ETA ' + (assignedWorker.time || 5) + ' mins).');
+      showToast('Booking sent to ' + assignedName + '.');
 
       setTimeout(() => {
         setPaymentModal(prev => ({ ...prev, open: false }));
         setHomeRepair(prev => ({ ...prev, view: 'home' }));
       }, 2000);
-    }, 1500);
+    } catch (error) {
+      setPaymentModal(prev => ({ ...prev, step: 'payment', error: error.message || 'Unable to dispatch this booking.' }));
+      showToast(error.message || 'Unable to dispatch this booking.');
+    }
   }
 
   function closePaymentModal() {
@@ -695,7 +760,8 @@ export function useLabouRackApp() {
     setPaymentModal(prev => ({ ...prev, paymentMethod: method }));
   }
 
-  function cancelBooking(bookingId) {
+  async function cancelBooking(bookingId) {
+    try { await cancelBookingRequest(bookingId); } catch (_) {}
     setActiveBookings(prev => prev.filter(b => b.id !== bookingId));
     showToast('Booking cancelled successfully.');
   }
@@ -1158,7 +1224,9 @@ export function useLabouRackApp() {
     showToast('We’ll notify you as soon as ' + worker.name + ' becomes available!');
   }
 
-  const matchingWorkers = getMatchingWorkers(homeRepair.category, homeRepair.issue).filter(worker => {
+  const sourceWorkers = liveWorkers;
+  const matchingWorkers = sourceWorkers.filter(worker => {
+    if (homeRepair.category && worker.categories && !worker.categories.includes(homeRepair.category.id)) return false;
     if (homeRepair.filter === 'nearby') return worker.distance <= 3;
     if (homeRepair.filter === 'rated') return worker.rating >= 4.8;
     if (homeRepair.filter === 'available') return worker.status === 'Available now';
@@ -1188,7 +1256,7 @@ export function useLabouRackApp() {
       bookingModal,
       paymentModal,
       availableLocations,
-      workerProfiles,
+      workerProfiles: sourceWorkers,
       dashboard: getDashboardContent(role, searchTitle),
       homeRepair: { ...homeRepair, workers: matchingWorkers },
     },

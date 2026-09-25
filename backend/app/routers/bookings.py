@@ -4,14 +4,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
-from typing import Optional
+from typing import Literal, Optional
 from datetime import datetime, timezone
 
 from app.core.deps import get_db, get_current_user, require_customer, require_any
-from app.models.user import User
+from app.models.user import CustomerProfile, User, WorkerProfile
 from app.models.booking import Booking, BookingStatus, PaymentMethod
+from app.models.job import JobRequest, JobStatus
 from app.utils.otp import generate_dispatch_otp
-from app.tasks.job_dispatch import dispatch_job_to_nearby_workers
+from app.services.matching import assign_booking
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
@@ -25,10 +26,18 @@ class CreateBookingRequest(BaseModel):
     locality: Optional[str] = None
     time_slot: Optional[str] = None
     payment_method: Optional[str] = "upi"
+    selected_worker_id: Optional[str] = None
+    express: bool = False
 
 
 class CancelBookingRequest(BaseModel):
     reason: Optional[str] = None
+
+
+class EstimateDecisionRequest(BaseModel):
+    decision: Literal["accepted", "rejected", "counter_offer"]
+    feedback: Optional[str] = None
+    counter_offer: Optional[float] = None
 
 
 # ── Create booking ─────────────────────────────────────────────────────────────
@@ -39,7 +48,6 @@ async def create_booking(
     current_user: User = Depends(require_customer),
 ):
     # Find customer profile id
-    from app.models.user import CustomerProfile
     result = await db.execute(
         select(CustomerProfile).where(CustomerProfile.user_id == current_user.id)
     )
@@ -64,12 +72,23 @@ async def create_booking(
     await db.flush()
     await db.refresh(booking)
 
-    # Dispatch to nearby workers via Celery (non-blocking)
-    dispatch_job_to_nearby_workers.delay(booking.id, body.category, body.locality or "")
+    worker, job = await assign_booking(
+        db,
+        booking,
+        customer,
+        current_user,
+        selected_worker_id=body.selected_worker_id,
+    )
+    if not worker or not job:
+        message = "The selected worker is unavailable for this category." if body.selected_worker_id else "No available Dhanbad worker matches this category."
+        raise HTTPException(status_code=409, detail=message)
 
     return {
-        "message": "Booking created. Finding nearby workers...",
+        "message": "Booking sent directly to the selected worker." if body.selected_worker_id else "Express Book assigned the best available Dhanbad worker.",
         "booking_id": booking.id,
+        "job_id": job.id,
+        "assignment_type": "selected_worker" if body.selected_worker_id else "express",
+        "assigned_worker": {"id": worker.id, "name": (await db.execute(select(User.name).where(User.id == worker.user_id))).scalar_one()},
         "dispatch_otp": otp,   # Share with worker at arrival for verification
         "status": booking.status.value,
     }
@@ -81,7 +100,6 @@ async def list_my_bookings(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_customer),
 ):
-    from app.models.user import CustomerProfile
     result = await db.execute(
         select(CustomerProfile).where(CustomerProfile.user_id == current_user.id)
     )
@@ -94,7 +112,26 @@ async def list_my_bookings(
         .where(Booking.customer_id == customer.id)
         .order_by(Booking.created_at.desc())
     )
-    return result.scalars().all()
+    bookings = result.scalars().all()
+    response = []
+    for booking in bookings:
+        job_result = await db.execute(select(JobRequest).where(JobRequest.booking_id == booking.id))
+        job = job_result.scalar_one_or_none()
+        worker_name = None
+        if job:
+            worker_result = await db.execute(
+                select(User.name)
+                .join(WorkerProfile, WorkerProfile.user_id == User.id)
+                .where(WorkerProfile.id == job.worker_id)
+            )
+            worker_name = worker_result.scalar_one_or_none()
+        response.append({
+            "booking": booking,
+            "job": job,
+            "worker_name": worker_name,
+            "estimate_available": bool(job and job.status in (JobStatus.estimate_sent, JobStatus.confirmed, JobStatus.counter_offered, JobStatus.estimate_rejected)),
+        })
+    return response
 
 
 # ── Get single booking ────────────────────────────────────────────────────────
@@ -108,7 +145,55 @@ async def get_booking(
     booking = result.scalar_one_or_none()
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found.")
-    return booking
+    customer_result = await db.execute(select(CustomerProfile).where(CustomerProfile.user_id == current_user.id))
+    customer = customer_result.scalar_one_or_none()
+    worker_result = await db.execute(select(WorkerProfile).where(WorkerProfile.user_id == current_user.id))
+    worker = worker_result.scalar_one_or_none()
+    if not (customer and booking.customer_id == customer.id) and not (worker and booking.worker_id == worker.id):
+        raise HTTPException(status_code=403, detail="You do not have access to this booking.")
+    job_result = await db.execute(select(JobRequest).where(JobRequest.booking_id == booking.id))
+    return {"booking": booking, "job": job_result.scalar_one_or_none()}
+
+
+@router.post("/{booking_id}/estimate-decision", summary="Customer accepts, rejects, or counters a worker estimate")
+async def decide_estimate(
+    booking_id: str,
+    body: EstimateDecisionRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_customer),
+):
+    customer_result = await db.execute(select(CustomerProfile).where(CustomerProfile.user_id == current_user.id))
+    customer = customer_result.scalar_one_or_none()
+    booking_result = await db.execute(select(Booking).where(Booking.id == booking_id))
+    booking = booking_result.scalar_one_or_none()
+    if not booking or not customer or booking.customer_id != customer.id:
+        raise HTTPException(status_code=404, detail="Booking not found.")
+
+    job_result = await db.execute(select(JobRequest).where(JobRequest.booking_id == booking_id))
+    job = job_result.scalar_one_or_none()
+    if not job or job.estimated_total is None:
+        raise HTTPException(status_code=400, detail="There is no worker estimate to respond to yet.")
+    if body.decision == "counter_offer" and (body.counter_offer is None or body.counter_offer < 0):
+        raise HTTPException(status_code=422, detail="A valid counter offer is required.")
+
+    job.customer_decision = body.decision
+    job.customer_feedback = body.feedback
+    job.customer_counter_offer = body.counter_offer if body.decision == "counter_offer" else None
+    job.customer_decision_at = datetime.now(timezone.utc)
+    if body.decision == "accepted":
+        job.status = JobStatus.confirmed
+        booking.status = BookingStatus.confirmed
+    elif body.decision == "rejected":
+        job.status = JobStatus.estimate_rejected
+    else:
+        job.status = JobStatus.counter_offered
+
+    return {
+        "message": f"Estimate {body.decision.replace('_', ' ')} and shared with the worker.",
+        "booking_id": booking.id,
+        "job_id": job.id,
+        "status": job.status.value,
+    }
 
 
 # ── Cancel booking ────────────────────────────────────────────────────────────

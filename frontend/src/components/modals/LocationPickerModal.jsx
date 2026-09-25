@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 
 const LOCATION_DATA = {
+  Jharkhand: { Dhanbad: ['Bank More', 'Hirapur', 'Saraidhela', 'Bartand', 'Dhansar'] },
   Karnataka: { Bengaluru: ['Indiranagar', 'Koramangala', 'HSR Layout', 'Whitefield', 'Jayanagar'], Mysuru: ['Vijayanagar', 'Kuvempunagar'] },
   Maharashtra: { Mumbai: ['Bandra West', 'Andheri East', 'Powai'], Pune: ['Koregaon Park', 'Baner', 'Viman Nagar'] },
   Delhi: { 'New Delhi': ['Hauz Khas', 'Dwarka', 'Saket', 'Rohini'] },
@@ -11,7 +12,7 @@ const LOCATION_DATA = {
 };
 
 const POPULAR_LOCATIONS = [
-  ['Indiranagar', 'Bengaluru', 'Karnataka'],
+  ['Bank More', 'Dhanbad', 'Jharkhand'],
   ['Bandra West', 'Mumbai', 'Maharashtra'],
   ['Hauz Khas', 'New Delhi', 'Delhi'],
   ['Gachibowli', 'Hyderabad', 'Telangana'],
@@ -20,9 +21,9 @@ const POPULAR_LOCATIONS = [
 ];
 
 export default function LocationPickerModal({ state, actions }) {
-  const [selectedState, setSelectedState] = useState('Karnataka');
-  const [selectedCity, setSelectedCity] = useState('Bengaluru');
-  const [selectedArea, setSelectedArea] = useState('Indiranagar');
+  const [selectedState, setSelectedState] = useState('Jharkhand');
+  const [selectedCity, setSelectedCity] = useState('Dhanbad');
+  const [selectedArea, setSelectedArea] = useState('Bank More');
   const [query, setQuery] = useState('');
 
   const cities = Object.keys(LOCATION_DATA[selectedState]);

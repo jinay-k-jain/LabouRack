@@ -20,6 +20,8 @@ class JobStatus(str, enum.Enum):
     inspecting = "inspecting"  # worker on-site, inspecting
     estimate_sent = "estimate_sent"  # worker sent price estimate
     confirmed = "confirmed"  # customer confirmed estimate
+    counter_offered = "counter_offered"
+    estimate_rejected = "estimate_rejected"
     completed = "completed"
     cancelled = "cancelled"
 
@@ -50,12 +52,20 @@ class JobRequest(Base):
     labour_charge = Column(Float, nullable=True)
     materials_cost = Column(Float, nullable=True)
     visiting_fee = Column(Float, default=69.0)
+    estimate_discount = Column(Float, default=0.0)
     estimated_total = Column(Float, nullable=True)
+
+    # Customer response to the worker's estimate
+    customer_decision = Column(String(30), nullable=True)
+    customer_feedback = Column(Text, nullable=True)
+    customer_counter_offer = Column(Float, nullable=True)
 
     # Timestamps
     dispatched_at = Column(DateTime(timezone=True), default=utcnow)
     accepted_at = Column(DateTime(timezone=True), nullable=True)
     estimate_sent_at = Column(DateTime(timezone=True), nullable=True)
+    customer_decision_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
     worker = relationship("WorkerProfile", back_populates="job_requests")
+    booking = relationship("Booking", back_populates="job_requests")
