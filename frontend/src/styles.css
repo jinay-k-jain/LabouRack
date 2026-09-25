@@ -622,6 +622,8 @@ label {
 .issue-search input::placeholder { color: #94a39b; font-weight: 500; }
 .issue-search button { height: 32px; padding: 0 14px; border: 0; border-radius: 7px; color: #fff; background: var(--green); font-size: 11px; font-weight: 800; }
 .issue-search button:hover { background: var(--green-hover); }
+.issue-search .search-voice-button { display: grid; width: 30px; flex: 0 0 30px; place-items: center; padding: 0; border-radius: 50%; background: #35c978; font-size: 15px; line-height: 1; box-shadow: 0 2px 6px rgba(11, 107, 70, 0.2); }
+.issue-search .search-voice-button:hover { background: #22ae65; transform: scale(1.05); }
 
 /* ROLE SWITCHER PILL IN HEADER */
 .header-role-switcher {
@@ -5983,6 +5985,24 @@ label {
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(11, 107, 70, 0.2);
 }
+
+.chatbot-voice-btn {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 0;
+  border-radius: 50%;
+  color: #0f1914;
+  background: #35c978;
+  font-size: 19px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(11, 107, 70, 0.2);
+}
+
+.chatbot-voice-btn:hover { background: #22ae65; transform: scale(1.05); }
 
 .chatbot-send-btn:hover:not(:disabled) {
   transform: scale(1.05);
