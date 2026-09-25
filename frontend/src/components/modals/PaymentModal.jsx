@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { initials } from '../../appLogic.js';
+import VoiceInputButton from '../VoiceInputButton.jsx';
 
 export default function PaymentModal({ state, actions }) {
   const { paymentModal } = state;
+  const photoInputRef = useRef(null);
   if (!paymentModal || !paymentModal.open) return null;
 
   const worker = paymentModal.worker;
@@ -17,6 +19,13 @@ export default function PaymentModal({ state, actions }) {
     { key: 'netbanking', icon: '🏦', label: 'Net Banking', sub: 'All Indian Banks' },
     { key: 'cod', icon: '💵', label: 'Pay After Service', sub: 'Cash or UPI to worker' },
   ];
+
+  function attachPhotos(event) {
+    const files = event.target.files;
+    if (!files || !files.length) return;
+    [...files].slice(0, 5).forEach(actions.addPaymentPhoto);
+    event.target.value = '';
+  }
 
   return (
     <div className="modal-backdrop" onClick={actions.closePaymentModal}>
@@ -70,38 +79,54 @@ export default function PaymentModal({ state, actions }) {
               </strong>
             </div>
 
-            {paymentModal.photos && paymentModal.photos.length > 0 && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '8px 12px',
-                background: 'rgba(16, 185, 129, 0.06)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
-                borderRadius: 8,
-                marginBottom: 12,
-              }}>
-                <span style={{ fontSize: 14 }}>📷</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981' }}>
-                  {paymentModal.photos.length} {paymentModal.photos.length === 1 ? 'photo' : 'photos'} attached:
-                </span>
-                <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
-                  {paymentModal.photos.map(p => (
-                    <img
-                      key={p.id}
-                      src={p.dataUrl}
-                      alt={p.name}
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: 4,
-                        objectFit: 'cover',
-                        border: '1px solid #10b981',
-                      }}
-                    />
+            <section className="payment-problem-details" aria-labelledby="paymentProblemDetails">
+              <div className="payment-problem-header">
+                <div>
+                  <p className="payment-problem-eyebrow">HELP THE PROFESSIONAL PREPARE</p>
+                  <h3 id="paymentProblemDetails">Describe the problem</h3>
+                </div>
+                <button
+                  type="button"
+                  className="payment-photo-button"
+                  onClick={() => photoInputRef.current?.click()}
+                >
+                  <span aria-hidden="true">📷</span> Add photos
+                </button>
+              </div>
+              <div className="payment-problem-input-wrap">
+                <textarea
+                  value={paymentModal.customerNote || ''}
+                  onChange={event => actions.setPaymentModalField('customerNote', event.target.value)}
+                  placeholder="Example: The tap has been leaking since morning. Water is pooling under the sink and the handle feels loose."
+                />
+                <VoiceInputButton
+                  className="payment-voice-button"
+                  onClick={() => actions.showToast('Voice input is coming soon.')}
+                />
+              </div>
+              <input
+                ref={photoInputRef}
+                className="payment-photo-input"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={attachPhotos}
+              />
+              <p className="payment-problem-hint">Add a note or photos so the professional can arrive prepared.</p>
+              {paymentModal.photos && paymentModal.photos.length > 0 && (
+                <div className="payment-photo-preview-grid">
+                  {paymentModal.photos.map(photo => (
+                    <div key={photo.id} className="payment-photo-preview">
+                      <img src={photo.dataUrl} alt={photo.name} />
+                      <button type="button" onClick={() => actions.removePaymentPhoto(photo.id)} title={`Remove ${photo.name}`}>✕</button>
+                    </div>
                   ))}
                 </div>
-              </div>
+              )}
+            </section>
+
+            {paymentModal.photos && paymentModal.photos.length > 0 && (
+              <div className="payment-photo-status">📷 {paymentModal.photos.length} {paymentModal.photos.length === 1 ? 'photo' : 'photos'} ready to share with the professional</div>
             )}
 
             <div className="payment-breakdown-box">

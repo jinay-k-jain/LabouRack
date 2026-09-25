@@ -30,14 +30,15 @@ export default function ProfileMenu({ state, actions }) {
   return (
     <div className="profile-menu">
       <button
-        className="avatar"
+        className="profile-trigger"
         type="button"
         title="View profile"
         aria-label="View profile"
         aria-expanded={profileOpen}
         onClick={actions.toggleProfile}
       >
-        {initials(name)}
+        <span className="avatar">{initials(name)}</span>
+        <span className="profile-trigger-chevron" aria-hidden="true">⌄</span>
       </button>
       {profileOpen && (
         <aside className="profile-popover" aria-label="Account details">

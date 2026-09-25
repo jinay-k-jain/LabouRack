@@ -1,6 +1,7 @@
 import React from 'react';
 import RegistrationShell from '../components/RegistrationShell.jsx';
 import OtpInputs from '../components/OtpInputs.jsx';
+import VoiceInputButton from '../components/VoiceInputButton.jsx';
 import { formatPhone, workerSkills } from '../appLogic.js';
 
 export default function WorkerRegistrationPage({ state, actions }) {
@@ -137,7 +138,10 @@ export default function WorkerRegistrationPage({ state, actions }) {
               <p className="field-note skill-note">Pick at least one primary skill category.</p>
             </div>
             <div className="register-field">
-              <label htmlFor="experience">Work Experience &amp; Description</label>
+              <div className="field-label-row">
+                <label htmlFor="experience">Work Experience &amp; Description</label>
+                <VoiceInputButton onClick={() => actions.showToast('Voice input is coming soon.')} />
+              </div>
               <textarea
                 className="experience-box"
                 id="experience"

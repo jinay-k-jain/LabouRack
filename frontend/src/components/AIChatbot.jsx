@@ -283,7 +283,7 @@ export default function AIChatbot() {
 
           {/* Footer */}
           <div className="chatbot-footer">
-            Powered by <strong>LabouRack AI</strong> • SIH 2026
+            Powered by <strong>LabouRack AI</strong>
           </div>
         </div>
       )}

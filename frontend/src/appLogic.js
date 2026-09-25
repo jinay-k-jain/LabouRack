@@ -428,9 +428,12 @@ function getDashboardContent(role, searchTitle) {
  * on rendering the interface.
  */
 export function useLabouRackApp() {
-  const [page, setPage] = useState('login');
-  const [role, setRole] = useState('customer');
-  const [session, setSession] = useState(loadSession);
+  const initialSession = useRef(loadSession()).current;
+  // Let visitors explore the service marketplace immediately; authentication is
+  // requested only when they intentionally sign in, register, or sign out.
+  const [page, setPage] = useState('dashboard');
+  const [role, setRole] = useState(initialSession.role || 'customer');
+  const [session, setSession] = useState(initialSession);
   const [phone, setPhone] = useState('');
   const [admin, setAdmin] = useState({ id: '', password: '' });
   const [otp, setOtp] = useState(emptyOtp);
@@ -580,6 +583,32 @@ export function useLabouRackApp() {
     showToast('Photo removed.');
   }
 
+  function addPaymentPhoto(file) {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      return showToast('Image too large. Maximum size is 10MB.');
+    }
+    const reader = new FileReader();
+    reader.onload = event => {
+      const newPhoto = {
+        id: 'payment_photo_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        name: file.name,
+        size: (file.size / 1024).toFixed(1) + ' KB',
+        dataUrl: event.target.result,
+      };
+      setPaymentModal(current => ({ ...current, photos: [...(current.photos || []), newPhoto] }));
+      showToast('Photo attached: ' + file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removePaymentPhoto(photoId) {
+    setPaymentModal(current => ({
+      ...current,
+      photos: (current.photos || []).filter(photo => photo.id !== photoId),
+    }));
+  }
+
   function confirmBooking(event) {
     if (event) event.preventDefault();
     if (!bookingModal.worker) return;
@@ -623,6 +652,7 @@ export function useLabouRackApp() {
       discount: 50,
       paymentMethod: 'upi',
       autoAssigned: true,
+      customerNote: '',
     });
   }
 
@@ -1034,7 +1064,7 @@ export function useLabouRackApp() {
   }
 
   function openHomeRepair() {
-    setHomeRepair({ view: 'categories', category: null, query: '', services: [], issue: '', filter: 'all' });
+    setHomeRepair({ view: 'services', category: null, query: '', services: serviceCatalog, issue: '', filter: 'all' });
   }
 
   function chooseHouseholdCategory(category) {
@@ -1092,21 +1122,20 @@ export function useLabouRackApp() {
   function goBackInHomeRepair() {
     setHomeRepair(current => {
       if (current.view === 'workers') {
-        return {
-          ...current,
-          view: current.services && current.services.length ? 'services' : 'categories',
-          issue: '',
-          filter: 'all'
-        };
+        return { view: 'home', category: null, query: '', services: [], issue: '', filter: 'all' };
       }
-      if (current.view === 'services') return { ...current, view: 'categories', category: null, query: '', services: [], issue: '', filter: 'all' };
-      if (current.view === 'issues') return { ...current, view: 'categories', category: null, issue: '', filter: 'all' };
+      if (current.view === 'services') return { view: 'home', category: null, query: '', services: [], issue: '', filter: 'all' };
+      if (current.view === 'issues') return { view: 'home', category: null, issue: '', filter: 'all' };
       return { view: 'home', category: null, query: '', services: [], issue: '', filter: 'all' };
     });
   }
 
   function closeHomeRepair() {
     setHomeRepair({ view: 'home', category: null, issue: '', filter: 'all' });
+  }
+
+  function changeServiceInHomeRepair() {
+    setHomeRepair(current => ({ ...current, view: 'services', issue: '', filter: 'all' }));
   }
 
   function setWorkerFilter(filter) {
@@ -1224,6 +1253,7 @@ export function useLabouRackApp() {
       openPopularProblem,
       goBackInHomeRepair,
       closeHomeRepair,
+      changeServiceInHomeRepair,
       setWorkerFilter,
       bookWorker,
       notifyWorker,
@@ -1238,10 +1268,13 @@ export function useLabouRackApp() {
       confirmPaymentAndDispatch,
       closePaymentModal,
       setPaymentMethod,
+      setPaymentModalField: (field, value) => setPaymentModal(current => ({ ...current, [field]: value })),
       cancelBooking,
       setBookingModalField: (field, val) => setBookingModal(prev => ({ ...prev, [field]: val })),
       addBookingPhoto,
       removeBookingPhoto,
+      addPaymentPhoto,
+      removePaymentPhoto,
     },
   };
 }

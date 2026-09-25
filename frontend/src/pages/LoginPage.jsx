@@ -31,9 +31,9 @@ export default function LoginPage({ state, actions }) {
     <AuthShell>
       <div className="auth-view">
         <div className="auth-heading">
-          <p className="eyebrow">SIH 2026 HYPERLOCAL PLATFORM</p>
+          <p className="eyebrow">HYPERLOCAL HOME SERVICES</p>
           <h1>Welcome to LabouRack.</h1>
-          <p>Select your user profile to test the platform prototype.</p>
+          <p>Select your profile to continue with LabouRack.</p>
         </div>
 
         <div className="role-switch" role="tablist" aria-label="Account type">

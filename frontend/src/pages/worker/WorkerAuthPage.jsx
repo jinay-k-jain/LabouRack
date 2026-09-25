@@ -5,6 +5,7 @@ import {
   STATES,
   INITIAL_REG_STATE,
 } from './workerData.js';
+import VoiceInputButton from '../../components/VoiceInputButton.jsx';
 
 // mode: 'both' (default) — shows Login + Register tabs
 // mode: 'register-only' — shows only registration form (no tabs)
@@ -15,7 +16,7 @@ const AUTH_STYLE = `
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f5f8f6;
+  --bg:#f7faf8;
   --surface:#ffffff;
   --card:#ffffff;
   --border:#e3e8e4;
@@ -24,7 +25,7 @@ const AUTH_STYLE = `
   --warn:#d97706;
   --text:#0f1914;
   --muted:#617368;
-  --subtle:#f0f5f3;
+  --subtle:#f6f9f7;
   --radius:14px;
   --font:'Plus Jakarta Sans',sans-serif;
 }
@@ -32,7 +33,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 
 .wauth-wrap{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg, #f0f5f3 0%, #e8f0ec 50%, #f5f8f6 100%);
+  background:#f7faf8;
   padding:24px;
 }
 .wauth-card{
@@ -196,7 +197,7 @@ html,body,#root{height:100%;font-family:var(--font);background:var(--bg);color:v
 .verify-btn:disabled{opacity:.5;cursor:not-allowed;}
 .verify-btn.done{background:#059669;}
 .field-note{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4;}
-.field-error{font-size:11px;color:#f87171;margin-top:5px;}
+.field-error{font-size:11px;color:#b91c1c;margin-top:5px;}
 
 /* GENDER PILLS */
 .gender-pills{display:flex;gap:8px;margin-top:6px;}
@@ -814,7 +815,10 @@ function Step4({ data, setData, onNext, onBack }) {
       </div>
 
       <div className="wf-group">
-        <label className="wf-label">Describe Your Expertise</label>
+        <div className="field-label-row">
+          <label className="wf-label">Describe Your Expertise</label>
+          <VoiceInputButton />
+        </div>
         <textarea
           className="wf-textarea"
           value={data.experienceDesc}
@@ -980,7 +984,7 @@ function Step5({ data, setData, onSubmit, onBack }) {
           <p style={{ color: 'var(--muted)', fontSize: 11, marginBottom: 6 }}>Service Categories</p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {cats.map(c => (
-              <span key={c.id} style={{ background: 'rgba(59,130,246,.15)', border: '1px solid rgba(59,130,246,.3)', borderRadius: 20, padding: '4px 10px', fontSize: 12, color: '#60a5fa' }}>
+              <span key={c.id} style={{ background: 'rgba(29,78,216,.08)', border: '1px solid rgba(29,78,216,.2)', borderRadius: 20, padding: '4px 10px', fontSize: 12, color: '#1d4ed8' }}>
                 {c.icon} {c.label}
               </span>
             ))}
@@ -1038,7 +1042,7 @@ function RegisterView({ onRegistered }) {
           Welcome to LabouRack, <strong>{data.name}</strong>! Your profile is being verified.
           You'll receive your first job notification once approved.
         </p>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: 'rgba(16,185,129,.1)', border: '1px solid rgba(16,185,129,.3)', borderRadius: 10, color: '#6ee7b7', fontSize: 13 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', background: 'rgba(11,107,70,.08)', border: '1px solid rgba(11,107,70,.2)', borderRadius: 10, color: '#0b6b46', fontSize: 13 }}>
           ⏳ Redirecting to your dashboard...
         </div>
       </div>
@@ -1069,7 +1073,7 @@ export default function WorkerAuthPage({ onAuthenticated, mode = 'both', onBack 
           <div className="wauth-brand">
             <div className="wauth-logo">L</div>
             <span className="wauth-logo-text">Labou<span>Rack</span></span>
-            <span style={{ marginLeft: 'auto', fontSize: 11, background: 'rgba(16,185,129,.15)', color: '#34d399', padding: '4px 10px', borderRadius: 20, fontWeight: 700 }}>
+            <span style={{ marginLeft: 'auto', fontSize: 11, background: 'rgba(11,107,70,.1)', color: '#0b6b46', padding: '4px 10px', borderRadius: 20, fontWeight: 700 }}>
               Worker Portal
             </span>
           </div>

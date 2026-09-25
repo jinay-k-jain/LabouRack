@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { initials } from '../../appLogic.js';
+import VoiceInputButton from '../VoiceInputButton.jsx';
 
 export default function BookingModal({ state, actions }) {
   const { bookingModal } = state;
@@ -80,14 +81,16 @@ export default function BookingModal({ state, actions }) {
         {/* FORM FIELDS */}
         <form onSubmit={actions.confirmBooking} className="booking-modal-form">
           <div className="booking-form-field">
-            <label htmlFor="bookingTaskInput">Selected Problem / Task</label>
-            <input
+            <div className="field-label-row">
+              <label htmlFor="bookingTaskInput">Describe the problem</label>
+              <VoiceInputButton onClick={() => actions.showToast('Voice input is coming soon.')} />
+            </div>
+            <textarea
               id="bookingTaskInput"
-              type="text"
-              className="booking-input-box"
+              className="booking-input-box booking-problem-description"
               value={bookingModal.issue || 'Home Service'}
               onChange={e => actions.setBookingModalField('issue', e.target.value)}
-              placeholder="Describe what needs fixing..."
+              placeholder="Tell the worker what is happening, where it is, and when it started..."
             />
           </div>
 
